@@ -1,0 +1,1 @@
+1)MNE project: number of algorithms and tools for eeg activity analysis on python -  http://martinos.org/mne/auto_examples/index.html
