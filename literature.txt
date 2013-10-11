@@ -1,0 +1,2 @@
+#Collection of links to articles relevant to the project
+1) Tadel.F., Brainstorm: A User-Friendly Application for MEG/EEG Analysis, http://www.hindawi.com/journals/cin/2011/879716/
