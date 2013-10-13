@@ -50,7 +50,7 @@ def halt():
     pass
 
 def keyboard(*args):
-    sys.exit()
+    sys.exit()  
 
 def mouse(button, state, x, y):
     global angle, delta_angle, move_x, move_y, move_length, halted
