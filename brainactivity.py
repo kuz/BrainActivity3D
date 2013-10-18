@@ -98,7 +98,7 @@ def init_model():
     """
     global brain
 
-    brain = objloader.OBJ('al.obj', 'model', swapyz=False)
+    brain = objloader.OBJ('brain.obj', 'model', swapyz=False)
 
 def main():
     """

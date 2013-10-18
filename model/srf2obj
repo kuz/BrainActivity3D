@@ -1,0 +1,26 @@
+#!/opt/local/bin/gawk -f
+
+BEGIN { if (ARGV[1] == "") { 
+print "Convert Surface ASCII format to OBJ."
+print ""
+print "Usage:"
+print "srf2obj input.srf > output.obj"
+print ""
+print "The output goes to stdout. Use > to redirect to"
+print "a file, as shown above"
+print ""
+print "_____________________________________"
+print "Anderson M. Winkler"
+print "Yale University / Institute of Living"
+print "Jan/2010"
+print "http://brainder.org"
+exit } }
+
+# Count number of vertices and faces from the 2nd record
+NR == 2 { nV=$1 ; nF=$2 }
+
+# Convert vertex coordinates
+NR>=3 && NR<=nV+2 { print "v", $1, $2, $3}
+
+# Convert faces' vertex indices
+NR>=nV+3 && NR<=nV+nF+2 { print "f", $1+1, $2+1, $3+1 }
