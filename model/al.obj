@@ -17,7 +17,7 @@
 #	may not, however, be resold in existing or modified form.
 #
 
-mtllib al.mtl
+#mtllib al.mtl
 
 g
 v 0.786019 -2.928538 0.601628

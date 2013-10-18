@@ -27,18 +27,17 @@ def init():
     glutCreateWindow('Brain Activity 3D')
 
     # Enable Z-Buffer
-    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_DEPTH_TEST)
+
+    # Perpective
+    glMatrixMode(GL_PROJECTION)
+    gluPerspective(45, 1, 0.5, 100)
+    glMatrixMode(GL_MODELVIEW)
 
     # Enable basic lighting
     glEnable(GL_LIGHT0);
     glEnable(GL_COLOR_MATERIAL);
     glEnable(GL_LIGHTING);
-    
-    # Set up projectino and viewport
-    glMatrixMode(GL_PROJECTION)
-    glLoadIdentity()
-    #gluLookAt(0,0,3,0,0,0,0,0,1)
-    glOrtho(-5.0, 5.0, -5.0, 5.0, -5.0, 5.0)
 
     # Initialize model
     init_model()
@@ -68,7 +67,34 @@ def display():
     # Clear screen
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    glLoadIdentity()
+    #gluLookAt(0, 1, 1, 0, 0, 0, 0, 1, 0)
+    gluLookAt(0, 1, 10, 0, 0, 0, 0, 1, 0)
+    #glOrtho(-5.0, 5.0, -5.0, 5.0, -5.0, 5.0)
+
+    glLightfv(GL_LIGHT0, GL_POSITION, [-5, 5, 0.5, 1])
+
+    glScalef(0.01, 0.01, 0.01)
+
+    glPushMatrix()
+    glTranslatef(-5, 5, 0.5)
+    glutSolidSphere(10, 10, 10)
+    glPopMatrix()
+    
+    glRotatef(glutGet(GLUT_ELAPSED_TIME)*0.03, -1, 0, 0)
+    
+    #glPushMatrix()
+    #glTranslatef(0, 0.5, 0)
+    #glRotatef(90, 1, 0, 0)
+    #glColor(1, 0, 0);
+    #glutSolidCylinder(0.3, 1, 10, 10)
+    #glPopMatrix()
+
+    #glColor(0, 1, 0);
+    #glRectf(-1, 1, 1, -1)
+
     # Draw brain
+    #glTranslatef(0, 0.5, 0)
     glCallList(brain.gl_list)
 
     # Switch buffers
@@ -98,7 +124,8 @@ def init_model():
     """
     global brain
 
-    brain = objloader.OBJ('brain.obj', 'model', swapyz=False)
+    brain = objloader.OBJ('brain_10.obj', 'model', swapyz=False)
+    #brain = objloader.OBJ('al.obj', 'model', swapyz=False)
 
 def main():
     """
