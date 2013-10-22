@@ -1,4 +1,5 @@
 import pygame
+import random
 from OpenGL.GL import *
  
 def MTL(filename, path):
@@ -75,7 +76,9 @@ class OBJ:
                     else:
                         norms.append(0)
                 self.faces.append((face, norms, texcoords, material))
- 
+        print len(self.faces)
+        #random.shuffle(self.faces)
+        #self.faces = self.faces[0:100000]
         self.gl_list = glGenLists(1)
         glNewList(self.gl_list, GL_COMPILE)
         glEnable(GL_TEXTURE_2D)
