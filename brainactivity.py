@@ -13,16 +13,25 @@ from OpenGL.GLU import *
 from OpenGL.GLUT import *
 from lib import objloader
 
+# Register global variables
 brain = None
+angle_x = 0
+angle_y = 0
+screen_w = 800
+screen_h = 600
 
 def init():
     """
     Initialize OpenGL and GLUT
     """
+
+    global screen_w
+    global screen_h
+
     # Initialize engine
     glutInit(sys.argv)
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH | GLUT_SRGB)
-    glutInitWindowSize(800, 600)
+    glutInitWindowSize(screen_w, screen_h)
     glutInitWindowPosition(200,50);
     glutCreateWindow('Brain Activity 3D')
 
@@ -35,20 +44,15 @@ def init():
 
     # Perpective
     glMatrixMode(GL_PROJECTION)
-    gluPerspective(45, 4/3, 0.5, 40)
+    gluPerspective(45, 4/3, 0.5, 400)
 
     glMatrixMode(GL_MODELVIEW)
 
     # Enable basic lighting
-    #glEnable(GL_COLOR_MATERIAL)
     glEnable(GL_LIGHTING)
 
-    # Put all defaults to zero
+    # Add light sources
     glEnable(GL_LIGHT0)
-    #glLightfv(GL_LIGHT0, GL_AMBIENT, [0, 0, 0, 0])
-    #glLightfv(GL_LIGHT0, GL_SPECULAR, [0, 0, 0, 0])
-    #glLightfv(GL_LIGHT0, GL_DIFFUSE, [0, 0, 0, 0])
-    #glLightModelfv(GL_LIGHT_MODEL_AMBIENT, [0, 0, 0, 0])
 
     # Backface culling
     glEnable(GL_CULL_FACE)
@@ -61,6 +65,7 @@ def init():
     glutDisplayFunc(display)
     glutIdleFunc(idle)
     #glutMouseFunc(mouse)
+    glutMotionFunc(mouse_drag)
     glutKeyboardFunc(keyboard)
 
     # Start main loop
@@ -70,41 +75,42 @@ def reshape(w, h):
     """
     Process reshaping of the window
     """
-    pass
+    screen_w = w
+    screen_h = h
 
 def display():
     """
     Main drawing function
     """
     global brain
+    global angle_x
+    global angle_y
 
     # Clear screen
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    # Ambient light
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, [0.1, 0.1, 0.1, 1.0]);
+
     #Light source 0
-    glLightfv(GL_LIGHT0, GL_POSITION, [0, 1, 0, 0])
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, [0.1, 0.1, 0.1, 1])
     glLightfv(GL_LIGHT0, GL_SPECULAR, [0, 0, 0, 1])
+    glLightfv(GL_LIGHT0, GL_POSITION, [0, 0, 1, 0])
     
     # Material    
-    glMaterialfv(GL_FRONT, GL_AMBIENT, [0.5, 0.5, 0.5, 1])
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, [0.5, 0.5, 0.5, 1])
-    glMaterialfv(GL_FRONT, GL_SPECULAR, [0.8, 0.8, 0.8, 1])
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, [0.1, 0.1, 0.1, 1])
+    glMaterialfv(GL_FRONT, GL_SPECULAR, [0, 0, 0, 1])
+    glMaterialfv(GL_FRONT, GL_SHININESS, 100)
+    glMaterialfv(GL_FRONT, GL_EMISSION, [0.3, 0.3, 0.3, 1])
     
+    # Set up the camera
     glLoadIdentity()
-    gluLookAt(0, 20, 20, 0, 0, 0, 0, 0, 1)
-    
-    glScalef(0.1, 0.1, 0.1)
+    gluLookAt(200, 200, 0, 0, 0, 0, 0, 0, 1)
 
-    glPushMatrix()
-    glTranslatef(0, 0, 0)
-    #glRotatef(90,1,0,0)
-    #glutSolidTeapot(3)
-    #glutSolidTorus(3, 5, 30, 30)
-    glPopMatrix()
-    
     # Draw brain
     glPushMatrix()
-    glRotatef(glutGet(GLUT_ELAPSED_TIME)*0.03, -1, 0, 0)
+    glRotatef(angle_x, 0, 0, 1)
+    glRotatef(angle_y, 0, 1, 0)
     glCallList(brain.gl_list)
     glPopMatrix()
 
@@ -117,11 +123,24 @@ def idle():
     """
     display()
 
-def mouse():
+def mouse(button, state, x, y):
     """
     Process mouse events
     """
     pass
+
+def mouse_drag(x, y):
+    """
+    Process mouse events
+    """
+
+    global screen_w
+    global screen_h
+    global angle_x
+    global angle_y
+
+    angle_x = (360 / float(screen_w)) * x;
+    angle_y = (360 / float(screen_h)) * y;
 
 def keyboard():
     """
@@ -134,8 +153,7 @@ def init_model():
     Load model from Wavefront .obj file
     """
     global brain
-    brain = objloader.OBJ('brain_simplified.obj', 'model', swapyz=False)
-    #brain = objloader.OBJ('brain.obj', 'model', swapyz=False)
+    brain = objloader.OBJ('brain_20k.obj', 'model', swapyz=False)
 
 def main():
     """
