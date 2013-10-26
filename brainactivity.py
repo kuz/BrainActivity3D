@@ -15,8 +15,13 @@ from lib import objloader
 
 # Register global variables
 brain = None
+
 angle_x = 0
 angle_y = 0
+
+prev_x = 0
+prev_y = 0
+
 screen_w = 800
 screen_h = 600
 
@@ -64,7 +69,7 @@ def init():
     glutReshapeFunc(reshape)
     glutDisplayFunc(display)
     glutIdleFunc(idle)
-    #glutMouseFunc(mouse)
+    glutMouseFunc(mouse)
     glutMotionFunc(mouse_drag)
     glutKeyboardFunc(keyboard)
 
@@ -90,16 +95,16 @@ def display():
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     # Ambient light
-    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, [0.1, 0.1, 0.1, 1.0]);
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, [0.4, 0.4, 0.4, 1.0]);
 
     #Light source 0
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, [0.1, 0.1, 0.1, 1])
-    glLightfv(GL_LIGHT0, GL_SPECULAR, [0, 0, 0, 1])
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, [0.4, 0.4, 0.4, 1])
+    glLightfv(GL_LIGHT0, GL_SPECULAR, [0.1, 0.1, 0.1, 1])
     glLightfv(GL_LIGHT0, GL_POSITION, [0, 0, 1, 0])
     
     # Material    
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, [0.1, 0.1, 0.1, 1])
-    glMaterialfv(GL_FRONT, GL_SPECULAR, [0, 0, 0, 1])
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, [0.4, 0.4, 0.4, 1])
+    glMaterialfv(GL_FRONT, GL_SPECULAR, [0.1, 0.1, 0.1, 1])
     glMaterialfv(GL_FRONT, GL_SHININESS, 100)
     glMaterialfv(GL_FRONT, GL_EMISSION, [0.3, 0.3, 0.3, 1])
     
@@ -110,7 +115,7 @@ def display():
     # Draw brain
     glPushMatrix()
     glRotatef(angle_x, 0, 0, 1)
-    glRotatef(angle_y, 0, 1, 0)
+    glRotatef(angle_y, 1, 0, 0)
     glCallList(brain.gl_list)
     glPopMatrix()
 
@@ -127,20 +132,37 @@ def mouse(button, state, x, y):
     """
     Process mouse events
     """
+    # once we pressed the left button this corresponds to the start of the rotation
+    global prev_x
+    global prev_y
+    if state == GLUT_DOWN and button == GLUT_LEFT_BUTTON:
+        prev_x = x
+        prev_y = y
     pass
 
 def mouse_drag(x, y):
     """
     Process mouse events
     """
-
     global screen_w
     global screen_h
     global angle_x
     global angle_y
-
-    angle_x = (360 / float(screen_w)) * x;
-    angle_y = (360 / float(screen_h)) * y;
+    global prev_x
+    global prev_y
+    
+    dx = x - prev_x
+    dy = y - prev_y
+    
+    # could be done more precisely
+    angle_x += dx 
+    angle_y += -dy
+    
+    prev_x = x
+    prev_y = y
+    
+    #angle_x = (360 / float(screen_w)) * x;
+    #angle_y = (-1)*(360 / float(screen_h)) * y ;
 
 def keyboard():
     """
