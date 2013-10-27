@@ -99,12 +99,12 @@ def display():
 
     #Light source 0
     glLightfv(GL_LIGHT0, GL_DIFFUSE, [0.4, 0.4, 0.4, 1])
-    glLightfv(GL_LIGHT0, GL_SPECULAR, [0.1, 0.1, 0.1, 1])
+    glLightfv(GL_LIGHT0, GL_SPECULAR, [0, 0, 0, 1])
     glLightfv(GL_LIGHT0, GL_POSITION, [0, 0, 1, 0])
     
     # Material    
     glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, [0.4, 0.4, 0.4, 1])
-    glMaterialfv(GL_FRONT, GL_SPECULAR, [0.1, 0.1, 0.1, 1])
+    glMaterialfv(GL_FRONT, GL_SPECULAR, [0, 0, 0, 1])
     glMaterialfv(GL_FRONT, GL_SHININESS, 100)
     glMaterialfv(GL_FRONT, GL_EMISSION, [0.3, 0.3, 0.3, 1])
     
