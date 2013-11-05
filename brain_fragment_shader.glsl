@@ -1,8 +1,8 @@
-#version 330
+#version 120
 // vertex to fragment shader io
-in vec3 normal;
-in vec3 distance;
-in vec4 color;
+varying vec3 normal;
+varying vec3 distance_to_center;
+varying vec4 color;
 
 float edgefalloff = 1.0;
 float intensity = 0.5;
@@ -10,7 +10,7 @@ float ambient = 0.01;
 
 void main()
 {
-    float opac = dot(normalize(-normal), normalize(-distance));
+    float opac = dot(normalize(-normal), normalize(-distance_to_center));
     opac = abs(opac);
     opac = ambient + intensity*(1.0-pow(opac, edgefalloff));
     opac = 1.0 - opac;
