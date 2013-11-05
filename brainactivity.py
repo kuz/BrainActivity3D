@@ -12,6 +12,7 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
 from lib import objloader
+from OpenGL.GL.shaders import *
 
 # Register global variables
 brain = None
@@ -32,20 +33,16 @@ def init():
 
     global screen_w
     global screen_h
-
+    
     # Initialize engine
     glutInit(sys.argv)
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH | GLUT_SRGB)
     glutInitWindowSize(screen_w, screen_h)
     glutInitWindowPosition(200,50);
     glutCreateWindow('Brain Activity 3D')
-
-    # Enable Z-Buffer
+   
+    # Z-buffer
     glEnable(GL_DEPTH_TEST)
-    #glEnable(36281)
-
-    # Re-compute normals
-    glEnable(GL_AUTO_NORMAL)
 
     # Perpective
     glMatrixMode(GL_PROJECTION)
@@ -58,9 +55,10 @@ def init():
 
     # Add light sources
     glEnable(GL_LIGHT0)
-
-    # Backface culling
-    glEnable(GL_CULL_FACE)
+    
+    # Blending
+    glEnable(GL_BLEND)
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
     
     # Initialize model
     init_model()
@@ -72,7 +70,17 @@ def init():
     glutMouseFunc(mouse)
     glutMotionFunc(mouse_drag)
     glutKeyboardFunc(keyboard)
-
+    
+    # Set up shaders
+    with open("brain_vertex_shader.glsl") as vertex_shader, open("brain_fragment_shader.glsl") as fragment_shader:    
+        program = compileProgram(
+            compileShader(vertex_shader.read(), GL_VERTEX_SHADER),
+            compileShader(fragment_shader.read(), GL_FRAGMENT_SHADER),
+        )
+    
+    # Use shaders
+    glUseProgram(program)
+    
     # Start main loop
     glutMainLoop()
 
@@ -94,23 +102,29 @@ def display():
     # Clear screen
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    # Ambient light
-    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, [0.4, 0.4, 0.4, 1.0]);
-
     #Light source 0
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, [0.4, 0.4, 0.4, 1])
-    glLightfv(GL_LIGHT0, GL_SPECULAR, [0, 0, 0, 1])
-    glLightfv(GL_LIGHT0, GL_POSITION, [0, 0, 1, 0])
+    glLightfv(GL_LIGHT0, GL_AMBIENT, [0, 0, 0, 1])
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, [1, 1, 1, 1])
+    glLightfv(GL_LIGHT0, GL_SPECULAR, [1, 1, 1, 1])
+    glLightfv(GL_LIGHT0, GL_POSITION, [0, 0, 110, 0])
     
-    # Material    
-    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, [0.4, 0.4, 0.4, 1])
+    # Material front   
+    glMaterialfv(GL_FRONT, GL_AMBIENT, [0.2, 0.2, 0.2, 1])
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, [0.8, 0.8, 0.8, 1])
     glMaterialfv(GL_FRONT, GL_SPECULAR, [0, 0, 0, 1])
-    glMaterialfv(GL_FRONT, GL_SHININESS, 100)
-    glMaterialfv(GL_FRONT, GL_EMISSION, [0.3, 0.3, 0.3, 1])
+    glMaterialfv(GL_FRONT, GL_SHININESS, 0)
+    glMaterialfv(GL_FRONT, GL_EMISSION, [0, 0, 0, 1])
+    
+    # Material back   
+    glMaterialfv(GL_BACK, GL_AMBIENT, [0.2, 0.2, 0.2, 1])
+    glMaterialfv(GL_BACK, GL_DIFFUSE, [0.8, 0.8, 0.8, 1])
+    glMaterialfv(GL_BACK, GL_SPECULAR, [0, 0, 0, 1])
+    glMaterialfv(GL_BACK, GL_SHININESS, 0)
+    glMaterialfv(GL_BACK, GL_EMISSION, [0, 0, 0, 1])
     
     # Set up the camera
     glLoadIdentity()
-    gluLookAt(200, 200, 0, 0, 0, 0, 0, 0, 1)
+    gluLookAt(200, 200, 200, 0, 0, 0, 0, 0, 1)
 
     # Draw brain
     glPushMatrix()
