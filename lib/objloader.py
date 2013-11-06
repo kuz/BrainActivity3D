@@ -1,6 +1,7 @@
 import pygame
 import random
 from OpenGL.GL import *
+import numpy as np
  
 def MTL(filename, path):
     contents = {}
@@ -76,9 +77,7 @@ class OBJ:
                     else:
                         norms.append(0)
                 self.faces.append((face, norms, texcoords, material))
-        print len(self.faces)
-        #random.shuffle(self.faces)
-        #self.faces = self.faces[0:100000]
+
         self.gl_list = glGenLists(1)
         glNewList(self.gl_list, GL_COMPILE)
         glEnable(GL_TEXTURE_2D)
@@ -105,3 +104,52 @@ class OBJ:
             glEnd()
         glDisable(GL_TEXTURE_2D)
         glEndList()
+
+    """
+    def draw(self):
+        
+        '''
+        model_view_matrix = np.array(glGetFloatv(GL_MODELVIEW_MATRIX))
+        #print model_view_matrix
+        #print model_view_matrix[0:3,2]
+        #print 
+
+        #self.faces.sort(cmp=lambda x,y: x[0] - y[0])
+        #self.faces = self.faces[0:100]
+        #print self.vertices[0]
+        #print dot(self.vertices[self.faces[0][0][0]], model_view_matrix[2][0:3])
+
+        self.faces.sort(cmp=lambda x,y: int(\
+                                            (np.dot(self.vertices[x[0][0] - 1], \
+                                                model_view_matrix[0:3,2]) - \
+                                            np.dot(self.vertices[y[0][0] - 1], \
+                                                model_view_matrix[0:3,2]))) * 10000)       
+        ''' 
+
+        glEnable(GL_TEXTURE_2D)
+        glFrontFace(GL_CCW)
+        for face in self.faces:
+            vertices, normals, texture_coords, material = face
+ 
+            if hasattr(self, 'mtl'):
+                mtl = self.mtl[material]
+                if 'texture_Kd' in mtl:
+                    # use diffuse texmap
+                    glBindTexture(GL_TEXTURE_2D, mtl['texture_Kd'])
+                else:
+                    # just use diffuse colour
+                    glColor(*mtl['Kd'])
+ 
+            glBegin(GL_POLYGON)
+            for i in range(len(vertices)):
+                if normals[i] > 0:
+                    glNormal3fv(self.normals[normals[i] - 1])
+                if texture_coords[i] > 0:
+                    glTexCoord2fv(self.texcoords[texture_coords[i] - 1])
+                glVertex3fv(self.vertices[vertices[i] - 1])
+            glEnd()
+        glDisable(GL_TEXTURE_2D)
+    """
+
+
+

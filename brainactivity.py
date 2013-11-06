@@ -13,6 +13,7 @@ from OpenGL.GLU import *
 from OpenGL.GLUT import *
 from lib import objloader
 from OpenGL.GL.shaders import *
+import traceback
 
 # Register global variables
 brain = None
@@ -42,7 +43,7 @@ def init():
     glutCreateWindow('Brain Activity 3D')
    
     # Z-buffer
-    glEnable(GL_DEPTH_TEST)
+    #glEnable(GL_DEPTH_TEST)
 
     # Perpective
     glMatrixMode(GL_PROJECTION)
@@ -128,10 +129,15 @@ def display():
 
     # Draw brain
     glPushMatrix()
-    glRotatef(angle_x, 0, 0, 1)
-    glRotatef(angle_y, 1, 0, 0)
-    glCallList(brain.gl_list)
-    glPopMatrix()
+    try:
+        glRotatef(angle_x, 0, 0, 1)
+        glRotatef(angle_y, 1, 0, 0)
+        glCallList(brain.gl_list)
+        #brain.draw()
+    except:
+        traceback.print_exc()
+    finally:
+        glPopMatrix()
 
     # Switch buffers
     glutSwapBuffers()
