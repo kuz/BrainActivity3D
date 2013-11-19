@@ -48,7 +48,7 @@ def init():
     glutCreateWindow('Brain Activity 3D')
    
     # Z-buffer
-    #glEnable(GL_DEPTH_TEST)
+    glEnable(GL_DEPTH_TEST)
 
     # Perpective
     glMatrixMode(GL_PROJECTION)
@@ -113,11 +113,12 @@ def display():
     # Clear screen
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
+    glLoadIdentity()
     # Light source 0
     glLightfv(GL_LIGHT0, GL_AMBIENT, [0, 0, 0, 1])
     glLightfv(GL_LIGHT0, GL_DIFFUSE, [1, 1, 1, 1])
     glLightfv(GL_LIGHT0, GL_SPECULAR, [1, 1, 1, 1])
-    glLightfv(GL_LIGHT0, GL_POSITION, [0, -200, 0, 0])
+    glLightfv(GL_LIGHT0, GL_POSITION, [0, 0, 1, 0])
     
     # Material front   
     glMaterialfv(GL_FRONT, GL_AMBIENT, [0.2, 0.2, 0.2, 1])
@@ -134,7 +135,7 @@ def display():
     glMaterialfv(GL_BACK, GL_EMISSION, [0, 0, 0, 1])
     
     # Set up the camera
-    glLoadIdentity()
+    
     gluLookAt(200, 200, 200, 0, 0, 0, 0, 0, 1)
     
     # Draw things
