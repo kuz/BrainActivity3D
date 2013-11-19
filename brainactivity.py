@@ -17,6 +17,7 @@ import traceback
 
 # Register global variables
 brain = None
+program = None
 
 angle_x = 0
 angle_y = 0
@@ -36,6 +37,8 @@ def init():
 
     global screen_w
     global screen_h
+    global program
+    global p_shader_xray
     
     # Initialize engine
     glutInit(sys.argv)
@@ -85,7 +88,9 @@ def init():
     # Use shaders
     glUseProgram(program)
     p_shader_xray = glGetUniformLocation(program, 'shader_xray')
-    
+    if p_shader_xray in (None,-1):
+                print 'Warning, no uniform: %s'%( 'shader_xray' )
+        
     # Start main loop
     glutMainLoop()
 
@@ -103,15 +108,16 @@ def display():
     global brain
     global angle_x
     global angle_y
-
+    global p_shader_xray
+    
     # Clear screen
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    #Light source 0
+    
+    # Light source 0
     glLightfv(GL_LIGHT0, GL_AMBIENT, [0, 0, 0, 1])
     glLightfv(GL_LIGHT0, GL_DIFFUSE, [1, 1, 1, 1])
     glLightfv(GL_LIGHT0, GL_SPECULAR, [1, 1, 1, 1])
-    glLightfv(GL_LIGHT0, GL_POSITION, [0, 0, 0, 1])
+    glLightfv(GL_LIGHT0, GL_POSITION, [0, -200, 0, 0])
     
     # Material front   
     glMaterialfv(GL_FRONT, GL_AMBIENT, [0.2, 0.2, 0.2, 1])
@@ -126,11 +132,11 @@ def display():
     glMaterialfv(GL_BACK, GL_SPECULAR, [0, 0, 0, 1])
     glMaterialfv(GL_BACK, GL_SHININESS, 0)
     glMaterialfv(GL_BACK, GL_EMISSION, [0, 0, 0, 1])
-
+    
     # Set up the camera
     glLoadIdentity()
     gluLookAt(200, 200, 200, 0, 0, 0, 0, 0, 1)
-
+    
     # Draw things
     draw_electrodes()
     draw_brain()
@@ -148,7 +154,7 @@ def mouse(button, state, x, y):
     """
     Process mouse events
     """
-    # once we pressed the left button this corresponds to the start of the rotation
+    # Once we pressed the left button this corresponds to the start of the rotation
     global prev_x
     global prev_y
     if state == GLUT_DOWN and button == GLUT_LEFT_BUTTON:
@@ -170,15 +176,12 @@ def mouse_drag(x, y):
     dx = x - prev_x
     dy = y - prev_y
     
-    # could be done more precisely
+    # Could be done more precisely
     angle_x += dx 
     angle_y += -dy
     
     prev_x = x
     prev_y = y
-    
-    #angle_x = (360 / float(screen_w)) * x;
-    #angle_y = (-1)*(360 / float(screen_h)) * y ;
 
 def keyboard():
     """
@@ -200,7 +203,8 @@ def main():
     init()
 
 def draw_brain():
-    glColor(0, 0, 0)
+    global p_shader_xray
+
     glPushMatrix()
     glUniform1i(p_shader_xray, True)
     try:
@@ -213,6 +217,7 @@ def draw_brain():
         glPopMatrix()
 
 def draw_electrodes():
+    global p_shader_xray
 
     # Material front   
     glMaterialfv(GL_FRONT, GL_AMBIENT, [0.2, 0.2, 0.2, 1])
