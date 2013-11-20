@@ -125,21 +125,15 @@ def display():
     glLightfv(GL_LIGHT0, GL_SPECULAR, [1, 1, 1, 1])
     glLightfv(GL_LIGHT0, GL_POSITION, [0, 0, 1, 0])
     
-    # Material front   
-    glMaterialfv(GL_FRONT, GL_AMBIENT, [0.2, 0.2, 0.2, 1])
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, [0.8, 0.8, 0.8, 1])
-    glMaterialfv(GL_FRONT, GL_SPECULAR, [0, 0, 0, 1])
-    glMaterialfv(GL_FRONT, GL_SHININESS, 0)
-    glMaterialfv(GL_FRONT, GL_EMISSION, [0, 0, 0, 1])
-    
-    # Set up the camera
-    gluLookAt(200, 200, 200, 0, 0, 0, 0, 0, 1)
+    # Set up the camera    
+    gluLookAt(0, 300, 0, 0, 0, 0, 0, 0, 1)
+    glRotatef(90,0,0,1)
     
     # Draw things
     draw_electrodes()
     draw_brain()
-    draw_sources()
-
+	draw_sources()
+    
     # Switch buffers
     glutSwapBuffers()
 
@@ -208,10 +202,20 @@ def main():
     initgl()
 
 def draw_brain():
-    global p_shader_xray
 
+    global p_shader_xray
+    glColor3f(0, 0, 0)
+    
+    # Material front   
+    glMaterialfv(GL_FRONT, GL_AMBIENT, [0.2, 0.2, 0.2, 1])
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, [0.8, 0.8, 0.8, 1])
+    glMaterialfv(GL_FRONT, GL_SPECULAR, [0, 0, 0, 1])
+    glMaterialfv(GL_FRONT, GL_SHININESS, 0)
+    glMaterialfv(GL_FRONT, GL_EMISSION, [0, 0, 0, 1])
+    
     glPushMatrix()
     glUniform1i(p_shader_xray, True)
+
     try:
         glRotatef(angle_x, 0, 0, 1)
         glRotatef(angle_y, 1, 0, 0)
@@ -236,32 +240,57 @@ def draw_electrodes():
     glPushMatrix()
     glRotatef(angle_x, 0, 0, 1)
     glRotatef(angle_y, 1, 0, 0)
-
-    draw_electrode([-32.1,  39.5, 21.8]) # AF3  (1)
-    draw_electrode([-56.3,  22.3,  7.1]) # F7   (2)
-    draw_electrode([ -8.6,  30.6, 40.7]) # F3   (3)
-    draw_electrode([-35.1,  15.6, 35.5]) # FC5  (4)
-    draw_electrode([-58.6,  -1.5, 24.8]) # T7   (5)
-    draw_electrode([-47.5, -37.2, 43.6]) # P7   (6)
-    draw_electrode([-23.2, -60.2, 42.6]) # O1   (7)
-    draw_electrode([ 23.2, -60.2, 42.6]) # O2   (8)
-    draw_electrode([ 47.5, -37.2, 43.6]) # P8   (9)
-    draw_electrode([ 58.6, -1.5,  24.8]) # T8  (10)
-    draw_electrode([ 35.1,  15.6, 35.5]) # FC6 (11)
-    draw_electrode([  8.6,  30.6, 40.7]) # F4  (12)
-    draw_electrode([ 56.3,  22.3,  7.1]) # F8  (13)
-    draw_electrode([ 32.1,  39.5, 21.8]) # AF4 (14)
+    
+    # draw_electrode([-32.1,  39.5, 21.8]) # AF3  (1)
+    # draw_electrode([-56.3,  22.3,  7.1]) # F7   (2)
+    # draw_electrode([ -8.6,  30.6, 40.7]) # F3   (3)
+    # draw_electrode([-35.1,  15.6, 35.5]) # FC5  (4)
+    # draw_electrode([-58.6,  -1.5, 24.8]) # T7   (5)
+    # draw_electrode([-47.5, -37.2, 43.6]) # P7   (6)
+    # draw_electrode([-23.2, -60.2, 42.6]) # O1   (7)
+    # draw_electrode([ 23.2, -60.2, 42.6]) # O2   (8)
+    # draw_electrode([ 47.5, -37.2, 43.6]) # P8   (9)
+    # draw_electrode([ 58.6, -1.5,  24.8]) # T8  (10)
+    # draw_electrode([ 35.1,  15.6, 35.5]) # FC6 (11)
+    # draw_electrode([  8.6,  30.6, 40.7]) # F4  (12)
+    # draw_electrode([ 56.3,  22.3,  7.1]) # F8  (13)
+    # draw_electrode([ 32.1,  39.5, 21.8]) # AF4 (14)
+    
+    draw_electrode([-31.1,  55.5, 0.8], 'AF3') # AF3  (1)
+    draw_electrode([-56.3,  29.3,  2.1], 'F7') # F7   (2)
+    draw_electrode([ -8.6,  40.6, 30.7], 'F3') # F3   (3)
+    draw_electrode([-35.1,  15.6, 35.5], 'FC5') # FC5  (4)
+    draw_electrode([-58.6,  -1.5, 24.8], 'T7') # T7   (5)
+    draw_electrode([-47.5, -37.2, 43.6], 'P7') # P7   (6)
+    draw_electrode([-23.2, -60.2, 42.6], 'O1') # O1   (7)
+    draw_electrode([ 23.2, -60.2, 42.6], 'O2') # O2   (8)
+    draw_electrode([ 47.5, -37.2, 43.6], 'P8') # P8   (9)
+    draw_electrode([ 58.6, -1.5,  24.8], 'T8') # T8  (10)
+    draw_electrode([ 35.1,  15.6, 35.5], 'FC6') # FC6 (11)
+    draw_electrode([  8.6,  40.6, 30.7], 'F4') # F4  (12)
+    draw_electrode([ 56.3,  29.3,  2.1], 'F8') # F8  (13)
+    draw_electrode([ 31.1,  55.5, 0.8], 'AF4') # AF4 (14)
     
     glPopMatrix()
 
-def draw_electrode(position):
+def draw_electrode(position, label):
+    glColor3f(0, 0, 1)
     glPushMatrix()
     glTranslate(position[0],  position[1],  position[2])
+    draw_label(label)
     glutSolidSphere(5, 20, 20)
     glPopMatrix()
 
-def draw_source(position):
+def draw_label(text):
+    global program 
+    glUseProgram(0)
+    glDisable(GL_LIGHTING)
+    glRasterPos2f(0, 6)
+    glutBitmapString(GLUT_BITMAP_HELVETICA_18, text)
+    glEnable(GL_LIGHTING)
+    glUseProgram(program)
 
+def draw_source(position):    
     glMaterialfv(GL_FRONT, GL_AMBIENT, [0.2, 0.2, 0.2, 1])
     glMaterialfv(GL_FRONT, GL_DIFFUSE, [0.9, 0.3, 0.3, 1])
     glMaterialfv(GL_FRONT, GL_SPECULAR, [0, 0, 0, 1])
