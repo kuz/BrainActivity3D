@@ -132,7 +132,7 @@ def display():
     # Draw things
     draw_electrodes()
     draw_brain()
-	draw_sources()
+    draw_sources()
     
     # Switch buffers
     glutSwapBuffers()
