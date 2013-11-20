@@ -12,12 +12,15 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
 from lib import objloader
+from lib.epoc import Epoc
+from lib.sourcelocalizer import SourceLocalizer
 from OpenGL.GL.shaders import *
 import traceback
 
 # Register global variables
 brain = None
 program = None
+epoc = None
 
 angle_x = 0
 angle_y = 0
@@ -30,7 +33,7 @@ screen_h = 600
 
 p_shader_xray = 0
 
-def init():
+def initgl():
     """
     Initialize OpenGL and GLUT
     """
@@ -113,7 +116,9 @@ def display():
     # Clear screen
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
+    # Initialize view-transform matrix
     glLoadIdentity()
+
     # Light source 0
     glLightfv(GL_LIGHT0, GL_AMBIENT, [0, 0, 0, 1])
     glLightfv(GL_LIGHT0, GL_DIFFUSE, [1, 1, 1, 1])
@@ -127,20 +132,13 @@ def display():
     glMaterialfv(GL_FRONT, GL_SHININESS, 0)
     glMaterialfv(GL_FRONT, GL_EMISSION, [0, 0, 0, 1])
     
-    # Material back   
-    glMaterialfv(GL_BACK, GL_AMBIENT, [0.2, 0.2, 0.2, 1])
-    glMaterialfv(GL_BACK, GL_DIFFUSE, [0.8, 0.8, 0.8, 1])
-    glMaterialfv(GL_BACK, GL_SPECULAR, [0, 0, 0, 1])
-    glMaterialfv(GL_BACK, GL_SHININESS, 0)
-    glMaterialfv(GL_BACK, GL_EMISSION, [0, 0, 0, 1])
-    
     # Set up the camera
-    
     gluLookAt(200, 200, 200, 0, 0, 0, 0, 0, 1)
     
     # Draw things
     draw_electrodes()
     draw_brain()
+    draw_sources()
 
     # Switch buffers
     glutSwapBuffers()
@@ -201,7 +199,13 @@ def main():
     """
     Build the main pipeline
     """
-    init()
+    global epoc
+
+    # Initalize EPOC
+    epoc = Epoc()
+
+    # Initalize and start graphics
+    initgl()
 
 def draw_brain():
     global p_shader_xray
@@ -256,6 +260,26 @@ def draw_electrode(position):
     glutSolidSphere(5, 20, 20)
     glPopMatrix()
 
+def draw_source(position):
+
+    glMaterialfv(GL_FRONT, GL_AMBIENT, [0.2, 0.2, 0.2, 1])
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, [0.9, 0.3, 0.3, 1])
+    glMaterialfv(GL_FRONT, GL_SPECULAR, [0, 0, 0, 1])
+    glMaterialfv(GL_FRONT, GL_SHININESS, 0)
+    glMaterialfv(GL_FRONT, GL_EMISSION, [0, 0, 0, 1])
+
+    glUniform1i(p_shader_xray, False)
+
+    glPushMatrix()
+    glTranslate(position[0],  position[1],  position[2])
+    glutSolidSphere(5, 20, 20)
+    glPopMatrix()
+
+def draw_sources():
+    data = epoc.read_next_sample_dummy()
+    localizer = SourceLocalizer(data)
+    for s in range(localizer.number_of_sources):
+        draw_source(localizer.localize(s))
 
 # Start the program
 main()
