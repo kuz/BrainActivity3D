@@ -15,12 +15,17 @@ from lib import objloader
 from lib.epoc import Epoc
 from lib.sourcelocalizer import SourceLocalizer
 from OpenGL.GL.shaders import *
+from threading import Thread
 import traceback
+import time
 
 # Register global variables
 brain = None
 program = None
 epoc = None
+sample_sec = 0.5
+localizer = None
+source_locations = []
 
 angle_x = 0
 angle_y = 0
@@ -97,6 +102,18 @@ def initgl():
     # Start main loop
     glutMainLoop()
 
+def initepoc():
+    global epoc
+    epoc = Epoc(sample_sec)
+    epoc_reader_thread = Thread(target=epoc.read_dummy_samples)
+    epoc_reader_thread.start()
+
+def initsourceloc():
+    global localizer
+    localizer = SourceLocalizer()
+    source_localizer_thread = Thread(target=localize_sources)
+    source_localizer_thread.start()
+
 def reshape(w, h):
     """
     Process reshaping of the window
@@ -130,9 +147,9 @@ def display():
     glRotatef(90,0,0,1)
     
     # Draw things
+    draw_sources()
     draw_electrodes()
     draw_brain()
-    draw_sources()
     
     # Switch buffers
     glutSwapBuffers()
@@ -193,12 +210,8 @@ def main():
     """
     Build the main pipeline
     """
-    global epoc
-
-    # Initalize EPOC
-    epoc = Epoc()
-
-    # Initalize and start graphics
+    initepoc()
+    initsourceloc()
     initgl()
 
 def draw_brain():
@@ -304,11 +317,34 @@ def draw_source(position):
     glutSolidSphere(5, 20, 20)
     glPopMatrix()
 
+def localize_sources():
+    '''
+    This function is run via thread
+    '''
+    global localizer
+    global source_locations
+    global sample_sec
+
+    while True:
+        localizer.set_data(epoc.sample)
+        locations = []
+        for sn in range(localizer.number_of_sources):
+            locations.append(localizer.localize(sn))
+
+        source_locations = locations
+        print time.strftime('%d %b %Y %H:%M:%S') + ' SLOC   ' + 'New source location are calculated'
+
+        time.sleep(sample_sec)
+
 def draw_sources():
-    data = epoc.read_next_sample_dummy()
-    localizer = SourceLocalizer(data)
-    for s in range(localizer.number_of_sources):
-        draw_source(localizer.localize(s))
+    global source_locations
+
+    glPushMatrix()
+    glRotatef(angle_x, 0, 0, 1)
+    glRotatef(angle_y, 1, 0, 0)
+    for source in source_locations:
+        draw_source(source)
+    glPopMatrix()
 
 # Start the program
 main()
