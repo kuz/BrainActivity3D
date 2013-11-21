@@ -10,9 +10,10 @@ TODO:
 
 """
 
-import numpy as np
+#import numpy as np
 from sklearn.decomposition import FastICA
 from scipy.optimize import minimize
+from sklearn.decomposition import PCA
 
 class SourceLocalizer:
 
@@ -20,21 +21,15 @@ class SourceLocalizer:
     mixing_matrix = None
     electrode_data = None
     number_of_sources = None
+    last_source_locations = {}
 
     def __init__(self):
-        '''
-        Example how to get data variable from file:
-
-            f = open('../data/201305161823-KT-mental-3-240.csv').readlines()
-            lines = [map(float, ln.split(',')) for ln in f]
-            lines = np.asarray(lines)
-            lines = np.delete(lines, [14,15,16], axis=1) # delete last 2 columns
-
-        '''
-        self.number_of_sources = self.estimate_sources();
+        pass
 
     def set_data(self, data):
         self.data = data
+        self.number_of_sources = self.estimate_sources();
+        print 'Number of sources ' + str(self.number_of_sources)
 
     def ica(self):
         '''
@@ -70,7 +65,7 @@ class SourceLocalizer:
                                {'position':[ 56.3,  22.3,  7.1], 'contribution': self.mixing_matrix[12][source]}, # F8  (13)
                                {'position':[ 32.1,  39.5, 21.8], 'contribution': self.mixing_matrix[13][source]}] # AF4 (14)
 
-        result = minimize(self.error, [0, 0, 0, 1], method='Nelder-Mead')
+        result = minimize(self.error, self.last_source_locations.get(source, [0, 0, 0, 1]), method='Nelder-Mead')
         return result.x
 
     def error(self, configuration):
@@ -89,10 +84,12 @@ class SourceLocalizer:
         self.ica()
         (x, y, z, k) = self.optimize(source)
         print 'This constant should remain (almost) same: ' + str(k)
+        self.last_source_locations[source] = [x, y, z, k]
         return [x, y, z]
 
     def estimate_sources(self):
-        # TODO: estimate number of sources using PCA
-        return 2;
+        pca = PCA()
+        pca.fit(self.data)
+        return list(pca.explained_variance_ratio_ > 0.1).count(True)
 
 
