@@ -16,6 +16,7 @@ from lib.epoc import Epoc
 from lib.sourcelocalizer import SourceLocalizer
 from OpenGL.GL.shaders import *
 from threading import Thread
+from cgkit.cgtypes import *
 import traceback
 import time
 
@@ -26,9 +27,7 @@ epoc = None
 sample_sec = 0.5
 localizer = None
 source_locations = []
-
-angle_x = 0
-angle_y = 0
+rotation_matrix = mat4(1.0)
 
 prev_x = 0
 prev_y = 0
@@ -79,6 +78,7 @@ def initgl():
     glutMouseFunc(mouse)
     glutMotionFunc(mouse_drag)
     glutKeyboardFunc(keyboard)
+    glutSpecialFunc(keyboard)
     
     # Set up shaders
     with open("brain_vertex_shader.glsl") as vertex_shader, open("brain_fragment_shader.glsl") as fragment_shader:    
@@ -118,7 +118,6 @@ def reshape(w, h):
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
     gluPerspective(45, (3.0*w)/(4.0*h), 0.5, 500.0)
-    print (3.0*w)/(4.0*h)
     glMatrixMode(GL_MODELVIEW)
     
  
@@ -128,8 +127,6 @@ def display():
     Main drawing function
     """
     global brain
-    global angle_x
-    global angle_y
     global p_shader_xray
     
     # Clear screen
@@ -146,7 +143,6 @@ def display():
     
     # Set up the camera    
     gluLookAt(0, 300, 0, 0, 0, 0, 0, 0, 1)
-    glRotatef(90,0,0,1)
     
     # Draw things
     #draw_sources()
@@ -172,34 +168,50 @@ def mouse(button, state, x, y):
     if state == GLUT_DOWN and button == GLUT_LEFT_BUTTON:
         prev_x = x
         prev_y = y
-    pass
 
 def mouse_drag(x, y):
     """
     Process mouse events
     """
-    global screen_w
-    global screen_h
-    global angle_x
-    global angle_y
-    global prev_x
+    global prev_x   # Location where mouse was pressed
     global prev_y
+    global rotation_matrix # Current rotation matrix
     
     dx = x - prev_x
     dy = y - prev_y
+   
+    # Compute an 'object vector' which is a corresponding axis in object's coordinates
+    object_axis_vector = rotation_matrix.inverse()*vec3([0, 0, 1])
+    rotation_matrix = rotation_matrix.rotate(360*3.14*dx/(screen_w * 180), object_axis_vector)
+
+    object_axis_vector = rotation_matrix.inverse()*vec3([1, 0, 0])
+    rotation_matrix = rotation_matrix.rotate(360*3.14*dy/(screen_h * 180), object_axis_vector)
     
-    # Could be done more precisely
-    angle_x += dx 
-    angle_y += -dy
-    
+    # Save current coordinates as old ones
     prev_x = x
     prev_y = y
 
-def keyboard():
+def keyboard(key, x, y):
     """
     Process keyboard events
     """
-    pass
+    global rotation_matrix
+    
+    if key == GLUT_KEY_LEFT:
+        # Compute an 'object vector' which is a corresponding axis in object's coordinates  
+        object_axis_vector = rotation_matrix.inverse()*vec3([0, 0, 1])
+        rotation_matrix = rotation_matrix.rotate(3.14/90, object_axis_vector)
+    if key == GLUT_KEY_RIGHT:
+        object_axis_vector = rotation_matrix.inverse()*vec3([0, 0, 1])
+        rotation_matrix = rotation_matrix.rotate(-3.14/90, object_axis_vector)
+    if key == GLUT_KEY_UP:
+        object_axis_vector = rotation_matrix.inverse()*vec3([1, 0, 0])
+        rotation_matrix = rotation_matrix.rotate(3.14/90, object_axis_vector)
+    if key == GLUT_KEY_DOWN:
+        object_axis_vector = rotation_matrix.inverse()*vec3([1, 0, 0])
+        rotation_matrix = rotation_matrix.rotate(-3.14/90, object_axis_vector)
+    elif key == chr(27):
+        exit(0)
 
 def init_model():
     """
@@ -230,11 +242,9 @@ def draw_brain():
     
     glPushMatrix()
     glUniform1i(p_shader_xray, True)
-  
 
     try:
-        glRotatef(angle_x, 0, 0, 1)
-        glRotatef(angle_y, 1, 0, 0)
+        glMultMatrixf(rotation_matrix.toList())
         glCallList(brain.gl_list)
     except:
         traceback.print_exc()
@@ -254,8 +264,7 @@ def draw_electrodes():
     glUniform1i(p_shader_xray, False)
     
     glPushMatrix()
-    glRotatef(angle_x, 0, 0, 1)
-    glRotatef(angle_y, 1, 0, 0)
+    glMultMatrixf(rotation_matrix.toList())
     
     draw_electrode([-31.1,  55.5, 0.8], 'AF3') # AF3  (1)
     draw_electrode([-56.3,  29.3,  2.1], 'F7') # F7   (2)
@@ -328,8 +337,7 @@ def draw_sources():
     global source_locations
 
     glPushMatrix()
-    glRotatef(angle_x, 0, 0, 1)
-    glRotatef(angle_y, 1, 0, 0)
+    glMultMatrixf(rotation_matrix.toList())
     for source in source_locations:
         draw_source(source)
     glPopMatrix()
