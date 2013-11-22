@@ -147,7 +147,7 @@ def display():
     glRotatef(90,0,0,1)
     
     # Draw things
-    draw_sources()
+    #draw_sources()
     draw_electrodes()
     draw_brain()
     
@@ -228,6 +228,7 @@ def draw_brain():
     
     glPushMatrix()
     glUniform1i(p_shader_xray, True)
+  
 
     try:
         glRotatef(angle_x, 0, 0, 1)
@@ -254,31 +255,16 @@ def draw_electrodes():
     glRotatef(angle_x, 0, 0, 1)
     glRotatef(angle_y, 1, 0, 0)
     
-    # draw_electrode([-32.1,  39.5, 21.8]) # AF3  (1)
-    # draw_electrode([-56.3,  22.3,  7.1]) # F7   (2)
-    # draw_electrode([ -8.6,  30.6, 40.7]) # F3   (3)
-    # draw_electrode([-35.1,  15.6, 35.5]) # FC5  (4)
-    # draw_electrode([-58.6,  -1.5, 24.8]) # T7   (5)
-    # draw_electrode([-47.5, -37.2, 43.6]) # P7   (6)
-    # draw_electrode([-23.2, -60.2, 42.6]) # O1   (7)
-    # draw_electrode([ 23.2, -60.2, 42.6]) # O2   (8)
-    # draw_electrode([ 47.5, -37.2, 43.6]) # P8   (9)
-    # draw_electrode([ 58.6, -1.5,  24.8]) # T8  (10)
-    # draw_electrode([ 35.1,  15.6, 35.5]) # FC6 (11)
-    # draw_electrode([  8.6,  30.6, 40.7]) # F4  (12)
-    # draw_electrode([ 56.3,  22.3,  7.1]) # F8  (13)
-    # draw_electrode([ 32.1,  39.5, 21.8]) # AF4 (14)
-    
     draw_electrode([-31.1,  55.5, 0.8], 'AF3') # AF3  (1)
     draw_electrode([-56.3,  29.3,  2.1], 'F7') # F7   (2)
     draw_electrode([ -8.6,  40.6, 30.7], 'F3') # F3   (3)
     draw_electrode([-35.1,  15.6, 35.5], 'FC5') # FC5  (4)
-    draw_electrode([-58.6,  -1.5, 24.8], 'T7') # T7   (5)
+    draw_electrode([-65.6,  -6.5, -21.8], 'T7') # T7   (5)
     draw_electrode([-47.5, -37.2, 43.6], 'P7') # P7   (6)
-    draw_electrode([-23.2, -60.2, 42.6], 'O1') # O1   (7)
-    draw_electrode([ 23.2, -60.2, 42.6], 'O2') # O2   (8)
+    draw_electrode([-23.2, -83.2, 22.6], 'O1') # O1   (7)
+    draw_electrode([ 23.2, -83.2, 22.6], 'O2') # O2   (8)
     draw_electrode([ 47.5, -37.2, 43.6], 'P8') # P8   (9)
-    draw_electrode([ 58.6, -1.5,  24.8], 'T8') # T8  (10)
+    draw_electrode([ 65.6,  -6.5,  -21.8], 'T8') # T8  (10)
     draw_electrode([ 35.1,  15.6, 35.5], 'FC6') # FC6 (11)
     draw_electrode([  8.6,  40.6, 30.7], 'F4') # F4  (12)
     draw_electrode([ 56.3,  29.3,  2.1], 'F8') # F8  (13)
