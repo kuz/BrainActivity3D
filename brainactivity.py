@@ -58,12 +58,6 @@ def initgl():
     # Z-buffer
     glEnable(GL_DEPTH_TEST)
 
-    # Perpective
-    glMatrixMode(GL_PROJECTION)
-    gluPerspective(45, 4/3, 0.5, 500)
-
-    glMatrixMode(GL_MODELVIEW)
-
     # Enable basic lighting
     glEnable(GL_LIGHTING)
 
@@ -120,6 +114,14 @@ def reshape(w, h):
     """
     screen_w = w
     screen_h = h
+    glViewport(0, 0, w, h)
+    glMatrixMode(GL_PROJECTION)
+    glLoadIdentity()
+    gluPerspective(45, (3.0*w)/(4.0*h), 0.5, 500.0)
+    print (3.0*w)/(4.0*h)
+    glMatrixMode(GL_MODELVIEW)
+    
+ 
 
 def display():
     """
