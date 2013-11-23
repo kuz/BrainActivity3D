@@ -38,7 +38,7 @@ void main()
         float opac = dot(normalize(-normal), normalize(-distance_to_center));
         opac = abs(opac);
         opac = ambient + intensity*(1.0-pow(opac, edgefalloff));
-        gl_FragColor =  opac * color * exp(0.02 * (vertex_position.z + 300));
+        gl_FragColor =  color * exp(0.02 * (vertex_position.z + 300));
         gl_FragColor.a = opac;
     
     } else {

@@ -39,6 +39,7 @@ class OBJ:
         self.normals = []
         self.texcoords = []
         self.faces = []
+        self.colors = []
  
         material = None
         for line in open(path + '/' + filename, "r"):
@@ -50,6 +51,8 @@ class OBJ:
                 if swapyz:
                     v = v[0], v[2], v[1]
                 self.vertices.append(v)
+                c = map(float, values[4:7])
+                self.colors.append(c)
             elif values[0] == 'vn':
                 v = map(float, values[1:4])
                 if swapyz:
@@ -76,15 +79,14 @@ class OBJ:
                         norms.append(int(w[2]))
                     else:
                         norms.append(0)
-                self.faces.append((face, norms, texcoords, material))
+                self.faces.append((face, norms, texcoords, material, self.colors))
 
         self.gl_list = glGenLists(1)
         glNewList(self.gl_list, GL_COMPILE)
         glEnable(GL_TEXTURE_2D)
         glFrontFace(GL_CCW)
         for face in self.faces:
-            vertices, normals, texture_coords, material = face
- 
+            vertices, normals, texture_coords, material, colors = face
             if hasattr(self, 'mtl'):
                 mtl = self.mtl[material]
                 if 'texture_Kd' in mtl:
@@ -96,6 +98,8 @@ class OBJ:
  
             glBegin(GL_POLYGON)
             for i in range(len(vertices)):
+                if colors[vertices[i] - 1] > 0:
+                    glColor(colors[vertices[i] - 1])
                 if normals[i] > 0:
                     glNormal3fv(self.normals[normals[i] - 1])
                 if texture_coords[i] > 0:

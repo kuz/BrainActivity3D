@@ -56,7 +56,7 @@ def initgl():
     glutCreateWindow('Brain Activity 3D')
    
     # Z-buffer
-    glEnable(GL_DEPTH_TEST)
+    #glEnable(GL_DEPTH_TEST)
 
     # Enable basic lighting
     glEnable(GL_LIGHTING)
@@ -206,7 +206,7 @@ def init_model():
     Load model from Wavefront .obj file
     """
     global brain
-    brain = objloader.OBJ('brain_20k.obj', 'model', swapyz=False)
+    brain = objloader.OBJ('brain_20k_colored.obj', 'model', swapyz=False)
 
 def main():
     """
@@ -229,6 +229,7 @@ def draw_brain():
     glMaterialfv(GL_FRONT, GL_EMISSION, [0, 0, 0, 1])
     
     glPushMatrix()
+    #glUniform1i(p_shader_xray, False)
     glUniform1i(p_shader_xray, True)
   
 
