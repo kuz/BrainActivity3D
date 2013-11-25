@@ -1,2 +1,3 @@
 1)MNE project: number of algorithms and tools for eeg activity analysis on python -  http://martinos.org/mne/auto_examples/index.html
 2)Brainder project, where a 3d model was taken from: http://brainder.org/download/brain-for-blender/
+3)(Pseudo) Intuitive rotation of objects in Opengl - http://www.raywenderlich.com/12667
