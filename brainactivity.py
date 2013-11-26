@@ -54,7 +54,7 @@ def initgl():
     glutCreateWindow('Brain Activity 3D')
    
     # Z-buffer
-    #glEnable(GL_DEPTH_TEST)
+    glEnable(GL_DEPTH_TEST)
 
     # Enable basic lighting
     glEnable(GL_LIGHTING)
@@ -76,7 +76,6 @@ def initgl():
     glutIdleFunc(idle)
     glutMouseFunc(mouse)
     glutMotionFunc(mouse_drag)
-    #glutMouseWheelFunc(mouseWheel)
     glutKeyboardFunc(keyboard)
     glutSpecialFunc(keyboard)
     
