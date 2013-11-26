@@ -28,13 +28,12 @@ sample_sec = 0.5
 localizer = None
 source_locations = []
 rotation_matrix = mat4(1.0)
-
 prev_x = 0
 prev_y = 0
 
 screen_w = 800
 screen_h = 600
-
+zoomFactor = 1.0
 p_shader_xray = 0
 
 def initgl():
@@ -77,6 +76,7 @@ def initgl():
     glutIdleFunc(idle)
     glutMouseFunc(mouse)
     glutMotionFunc(mouse_drag)
+    #glutMouseWheelFunc(mouseWheel)
     glutKeyboardFunc(keyboard)
     glutSpecialFunc(keyboard)
     
@@ -115,17 +115,20 @@ def reshape(w, h):
     screen_w = w
     screen_h = h
     glViewport(0, 0, w, h)
+    setProjectionMatrix(w,h)
+    
+def setProjectionMatrix (width, height):
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
-    gluPerspective(45, (3.0*w)/(4.0*h), 0.5, 500.0)
+    gluPerspective (45.0*zoomFactor, (3.0*width)/(4.0*height), 0.5, 500.0)
     glMatrixMode(GL_MODELVIEW)
     
- 
-
 def display():
     """
     Main drawing function
     """
+    global screen_w
+    global screen_h
     global brain
     global p_shader_xray
     
@@ -143,9 +146,8 @@ def display():
     
     # Set up the camera    
     gluLookAt(0, 300, 0, 0, 0, 0, 0, 0, 1)
-    
     # Draw things
-    #draw_sources()
+    draw_sources()
     draw_electrodes()
     draw_brain()
     
@@ -162,13 +164,24 @@ def mouse(button, state, x, y):
     """
     Process mouse events
     """
+    global zoomFactor
+    global screen_w
+    global screen_h
+    
     # Once we pressed the left button this corresponds to the start of the rotation
     global prev_x
     global prev_y
+    
     if state == GLUT_DOWN and button == GLUT_LEFT_BUTTON:
         prev_x = x
         prev_y = y
-
+    # MouseWheel
+    if button == 3:
+        zoomFactor += 0.1       
+    if button == 4 :
+        zoomFactor -= 0.1
+    setProjectionMatrix(screen_w,screen_h)
+        
 def mouse_drag(x, y):
     """
     Process mouse events
