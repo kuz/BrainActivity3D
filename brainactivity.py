@@ -177,9 +177,11 @@ def mouse(button, state, x, y):
         prev_y = y
     # MouseWheel
     if button == 3:
-        zoomFactor += 0.1       
+        if zoomFactor >= 0.2:
+            zoomFactor -= 0.1
     if button == 4 :
-        zoomFactor -= 0.1
+        if zoomFactor <= 3.0:
+            zoomFactor += 0.1
     setProjectionMatrix(screen_w,screen_h)
         
 def mouse_drag(x, y):
