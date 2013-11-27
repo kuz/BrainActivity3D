@@ -54,7 +54,7 @@ def initgl():
     glutCreateWindow('Brain Activity 3D')
    
     # Z-buffer
-    #glEnable(GL_DEPTH_TEST)
+    glEnable(GL_DEPTH_TEST)
 
     # Enable basic lighting
     glEnable(GL_LIGHTING)
@@ -104,7 +104,7 @@ def initepoc():
 
 def initsourceloc():
     global localizer
-    localizer = SourceLocalizer()
+    localizer = SourceLocalizer(epoc)
     source_localizer_thread = Thread(target=localize_sources)
     source_localizer_thread.start()
 
@@ -233,7 +233,7 @@ def init_model():
     Load model from Wavefront .obj file
     """
     global brain
-    brain = objloader.OBJ('brain_20k_colored.obj', 'model', swapyz=False)
+    brain = objloader.OBJ('brain_20k_colored_properly.obj', 'model', swapyz=False)
 
 def main():
     """
@@ -256,7 +256,6 @@ def draw_brain():
     glMaterialfv(GL_FRONT, GL_EMISSION, [0, 0, 0, 1])
     
     glPushMatrix()
-    #glUniform1i(p_shader_xray, False)
     glUniform1i(p_shader_xray, True)
 
     try:
@@ -282,20 +281,8 @@ def draw_electrodes():
     glPushMatrix()
     glMultMatrixf(rotation_matrix.toList())
     
-    draw_electrode([-31.1,  55.5, 0.8], 'AF3') # AF3  (1)
-    draw_electrode([-56.3,  29.3,  2.1], 'F7') # F7   (2)
-    draw_electrode([ -8.6,  40.6, 30.7], 'F3') # F3   (3)
-    draw_electrode([-35.1,  15.6, 35.5], 'FC5') # FC5  (4)
-    draw_electrode([-65.6,  -6.5, -21.8], 'T7') # T7   (5)
-    draw_electrode([-47.5, -37.2, 43.6], 'P7') # P7   (6)
-    draw_electrode([-23.2, -83.2, 22.6], 'O1') # O1   (7)
-    draw_electrode([ 23.2, -83.2, 22.6], 'O2') # O2   (8)
-    draw_electrode([ 47.5, -37.2, 43.6], 'P8') # P8   (9)
-    draw_electrode([ 65.6,  -6.5,  -21.8], 'T8') # T8  (10)
-    draw_electrode([ 35.1,  15.6, 35.5], 'FC6') # FC6 (11)
-    draw_electrode([  8.6,  40.6, 30.7], 'F4') # F4  (12)
-    draw_electrode([ 56.3,  29.3,  2.1], 'F8') # F8  (13)
-    draw_electrode([ 31.1,  55.5, 0.8], 'AF4') # AF4 (14)
+    for coordinate in epoc.coordinates:
+        draw_electrode(coordinate[0], coordinate[1])
     
     glPopMatrix()
 

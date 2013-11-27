@@ -14,7 +14,22 @@ class Epoc:
     sample = None
     sample_sec = 0
     sample_size = 0
-
+    
+    coordinates = [([-38.4,  68.6,   1.0], 'AF3'), # AF3  (1)
+                   ([-69.6,  36.2,   2.6], 'F7'),  # F7   (2)
+                   ([ -11.1, 52.4,  39.6], 'F3'),  # F3   (3)
+                   ([-45.2,  20.1,  45.7], 'FC5'), # FC5  (4)
+                   ([-79.8,  -7.9, -26.5], 'T7'),  # T7   (5)
+                   ([-57.1, -44.7,  52.4], 'P7'),  # P7   (6)
+                   ([-27.1, -97.2,  26.4], 'O1'),  # O1   (7)
+                   ([ 27.1, -97.2,  26.4], 'O2'),  # O2   (8)
+                   ([ 57.1, -44.7,  52.4], 'P8'),  # P8   (9)
+                   ([ 79.8,  -7.9, -26.5], 'T8'),  # T8  (10)
+                   ([ 45.2,  20.1,  45.7], 'FC6'), # FC6 (11)
+                   ([ 11.1,  52.4,  39.6], 'F4'),  # F4  (12)
+                   ([ 69.6,  36.2,   2.6], 'F8'),  # F8  (13)
+                   ([ 38.4,  68.6,   1.0], 'AF4')] # AF4 (14)
+    
     def __init__(self, sample_sec):
         self.headset = emotiv.Emotiv()
         gevent.spawn(self.headset.setup)
@@ -28,8 +43,7 @@ class Epoc:
         self.lines = np.asarray(self.lines)
         self.lines = np.delete(self.lines, [14,15,16], axis=1) # delete last 2 columns
         self.lastline = 0
-
-
+   
     def get_packet(self):
         '''
         Get one packet from the device packet queue

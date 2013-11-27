@@ -18,13 +18,14 @@ from sklearn.decomposition import PCA
 class SourceLocalizer:
 
     data = None
+    epoc = None
     mixing_matrix = None
-    electrode_data = None
+    electrode_data = []
     number_of_sources = None
     last_source_locations = {}
 
-    def __init__(self):
-        pass
+    def __init__(self, epoc):
+        self.epoc = epoc
 
     def set_data(self, data):
         self.data = data
@@ -50,20 +51,8 @@ class SourceLocalizer:
         Return
             (x, y, z, k)
         '''
-        self.electrode_data = [{'position':[-32.1,  39.5, 21.8], 'contribution': self.mixing_matrix[0][source]},  # AF3  (1)
-                               {'position':[-56.3,  22.3,  7.1], 'contribution': self.mixing_matrix[1][source]},  # F7   (2)
-                               {'position':[ -8.6,  30.6, 40.7], 'contribution': self.mixing_matrix[2][source]},  # F3   (3)
-                               {'position':[-35.1,  15.6, 35.5], 'contribution': self.mixing_matrix[3][source]},  # FC5  (4)
-                               {'position':[-58.6,  -1.5, 24.8], 'contribution': self.mixing_matrix[4][source]},  # T7   (5)
-                               {'position':[-47.5, -37.2, 43.6], 'contribution': self.mixing_matrix[5][source]},  # P7   (6)
-                               {'position':[-23.2, -60.2, 42.6], 'contribution': self.mixing_matrix[6][source]},  # O1   (7)
-                               {'position':[ 23.2, -60.2, 42.6], 'contribution': self.mixing_matrix[7][source]},  # O2   (8)
-                               {'position':[ 47.5, -37.2, 43.6], 'contribution': self.mixing_matrix[8][source]},  # P8   (9)
-                               {'position':[ 58.6, -1.5,  24.8], 'contribution': self.mixing_matrix[9][source]},  # T8  (10)
-                               {'position':[ 35.1,  15.6, 35.5], 'contribution': self.mixing_matrix[10][source]}, # FC6 (11)
-                               {'position':[  8.6,  30.6, 40.7], 'contribution': self.mixing_matrix[11][source]}, # F4  (12)
-                               {'position':[ 56.3,  22.3,  7.1], 'contribution': self.mixing_matrix[12][source]}, # F8  (13)
-                               {'position':[ 32.1,  39.5, 21.8], 'contribution': self.mixing_matrix[13][source]}] # AF4 (14)
+        for i,coordinate in enumerate(self.epoc.coordinates):
+            self.electrode_data.append({'position':coordinate[0], 'contribution': self.mixing_matrix[i][source]}) 
 
         result = minimize(self.error, self.last_source_locations.get(source, [0, 0, 0, 1]), method='Nelder-Mead')
         return result.x
