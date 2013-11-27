@@ -76,7 +76,6 @@ class Epoc:
         '''
         while True:
             self.sample = self.read_next_sample()
-            print time.strftime('%d %b %Y %H:%M:%S') + ' EPOC   ' + 'Sample readed'
             time.sleep(self.sample_sec)
 
     def read_next_sample_dummy(self):
@@ -91,7 +90,6 @@ class Epoc:
         '''
         while True:
             self.sample = self.read_next_sample_dummy()
-            print time.strftime('%d %b %Y %H:%M:%S') + ' EPOC   ' + 'Sample readed'
             time.sleep(self.sample_sec)
 
 

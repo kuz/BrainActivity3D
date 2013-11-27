@@ -24,7 +24,7 @@ import time
 brain = None
 program = None
 epoc = None
-sample_sec = 0.5
+sample_sec = 5
 localizer = None
 source_locations = []
 rotation_matrix = mat4(1.0)
@@ -331,7 +331,6 @@ def localize_sources():
             locations.append(localizer.localize(sn))
 
         source_locations = locations
-        print time.strftime('%d %b %Y %H:%M:%S') + ' SLOC   ' + 'New source location are calculated'
 
         time.sleep(sample_sec)
 

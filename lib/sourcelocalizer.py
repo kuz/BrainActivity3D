@@ -14,6 +14,8 @@ TODO:
 from sklearn.decomposition import FastICA
 from scipy.optimize import minimize
 from sklearn.decomposition import PCA
+from sympy import solve_poly_system, sympify
+import operator
 
 class SourceLocalizer:
 
@@ -30,7 +32,6 @@ class SourceLocalizer:
     def set_data(self, data):
         self.data = data
         self.number_of_sources = self.estimate_sources();
-        print 'Number of sources ' + str(self.number_of_sources)
 
     def ica(self):
         '''
@@ -56,6 +57,31 @@ class SourceLocalizer:
 
         result = minimize(self.error, self.last_source_locations.get(source, [0, 0, 0, 1]), method='Nelder-Mead')
         return result.x
+        
+        """
+        #self.electrode_data = sorted(self.electrode_data, key=lambda k: k['contribution'], reverse=False)
+        #self.electrode_data = self.electrode_data[0:4]
+
+        # Equations
+        equations = []
+        for electrode in self.electrode_data:
+            equations.append('(x - (%d))^2 + (y - (%d))^2 + (z - (%d))^2 - (%d) * k' % (sympify(electrode['position'][0]),
+                                                                                        sympify(electrode['position'][1]),
+                                                                                        sympify(electrode['position'][2]),
+                                                                                        sympify(electrode['contribution'])))
+
+        from sympy.abc import x, y, z, k
+        solutions = solve_poly_system(equations, x, y, z, k)
+
+        best_solution = [99999999999.0]
+        for solution in solutions:
+              solution = [abs(complex(x)) for x in solution]
+              if solution[-1] < best_solution[-1]:
+                  best_solution = solution
+
+        return best_solution
+        """
+    
 
     def error(self, configuration):
         source_pos = configuration[0:3]
@@ -72,7 +98,6 @@ class SourceLocalizer:
     def localize(self, source):
         self.ica()
         (x, y, z, k) = self.optimize(source)
-        print 'This constant should remain (almost) same: ' + str(k)
         self.last_source_locations[source] = [x, y, z, k]
         return [x, y, z]
 
