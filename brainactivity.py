@@ -76,7 +76,6 @@ def initgl():
     glutIdleFunc(idle)
     glutMouseFunc(mouse)
     glutMotionFunc(mouse_drag)
-    #glutMouseWheelFunc(mouseWheel)
     glutKeyboardFunc(keyboard)
     glutSpecialFunc(keyboard)
     
