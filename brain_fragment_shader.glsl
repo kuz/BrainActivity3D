@@ -6,7 +6,8 @@ varying vec3 distance_to_center;
 varying vec4 color;
 varying vec4 vertex_position;
 
-uniform bool shader_xray;
+uniform int shader_mode;
+
 
 float edgefalloff = 1.0;
 float intensity = 0.2;
@@ -32,19 +33,22 @@ vec4 blinn(gl_LightSourceParameters light) {
 }
 
 void main()
-{
-    if (shader_xray == true) {
-    
+{    
+    if (shader_mode == 0) {
+        gl_FragColor = color;
+    } else if (shader_mode == 1) {
+        vec4 c = gl_FrontMaterial.ambient * gl_LightModel.ambient + blinn(gl_LightSource[0]);
+        gl_FragColor = c;
+    } else if (shader_mode == 2) {    
         float opac = dot(normalize(-normal), normalize(-distance_to_center));
         opac = abs(opac);
         opac = ambient + intensity*(1.0-pow(opac, edgefalloff));
         gl_FragColor =  color;// * exp(0.02 * (vertex_position.z + 300));
+        //gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
         gl_FragColor.a = opac;
     
     } else {
-        
-        vec4 c = gl_FrontMaterial.ambient * gl_LightModel.ambient + blinn(gl_LightSource[0]);
-        gl_FragColor = c;
+        gl_FragColor = vec4(0.5,0.5,0.5,1.0);
     }
 }
         

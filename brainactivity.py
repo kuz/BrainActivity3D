@@ -33,8 +33,14 @@ prev_y = 0
 
 screen_w = 800
 screen_h = 600
-zoomFactor = 1.0
-p_shader_xray = 0
+zoom_factor = 1.0
+# Drawing mode for fragment shader:
+#   0 - simple color
+#   1 - blinn model
+#   2 - xray
+p_shader_mode = 0
+
+
 
 def initgl():
     """
@@ -44,7 +50,8 @@ def initgl():
     global screen_w
     global screen_h
     global program
-    global p_shader_xray
+    global p_shader_mode
+
     
     # Initialize engine
     glutInit(sys.argv)
@@ -88,10 +95,10 @@ def initgl():
     
     # Use shaders
     glUseProgram(program)
-    p_shader_xray = glGetUniformLocation(program, 'shader_xray')
-    if p_shader_xray in (None,-1):
-                print 'Warning, no uniform: %s'%( 'shader_xray' )
-        
+    p_shader_mode = glGetUniformLocation(program, 'shader_mode')
+    if p_shader_mode in (None,-1):
+        print 'Warning, no uniform: %s'%( 'shader_mode' )
+
     # Start main loop
     glutMainLoop()
 
@@ -119,7 +126,7 @@ def reshape(w, h):
 def setProjectionMatrix (width, height):
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
-    gluPerspective (45.0*zoomFactor, (3.0*width)/(4.0*height), 0.5, 500.0)
+    gluPerspective (45.0, (3.0*width)/(4.0*height), 0.5, 500.0)
     glMatrixMode(GL_MODELVIEW)
     
 def display():
@@ -129,7 +136,7 @@ def display():
     global screen_w
     global screen_h
     global brain
-    global p_shader_xray
+    global p_shader_mode
     
     # Clear screen
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -145,13 +152,18 @@ def display():
     
     # Set up the camera    
     gluLookAt(0, 300, 0, 0, 0, 0, 0, 0, 1)
+    
     # Draw things
+    draw_background()
+    glScale(zoom_factor, zoom_factor, zoom_factor)
     draw_sources()
     draw_electrodes()
     draw_brain()
     
+    glEnable(GL_LIGHTING)
     # Switch buffers
     glutSwapBuffers()
+
 
 def idle():
     """
@@ -163,7 +175,7 @@ def mouse(button, state, x, y):
     """
     Process mouse events
     """
-    global zoomFactor
+    global zoom_factor
     global screen_w
     global screen_h
     
@@ -176,12 +188,11 @@ def mouse(button, state, x, y):
         prev_y = y
     # MouseWheel
     if button == 3:
-        if zoomFactor >= 0.2:
-            zoomFactor -= 0.1
+        if zoom_factor <= 20.0:
+            zoom_factor += 0.05
     if button == 4 :
-        if zoomFactor <= 3.0:
-            zoomFactor += 0.1
-    setProjectionMatrix(screen_w,screen_h)
+        if zoom_factor >= 0.1:
+            zoom_factor -= 0.05
         
 def mouse_drag(x, y):
     """
@@ -244,7 +255,7 @@ def main():
 
 def draw_brain():
 
-    global p_shader_xray
+    global p_shader_mode
     glColor3f(0, 0, 0)
     
     # Material front   
@@ -255,7 +266,7 @@ def draw_brain():
     glMaterialfv(GL_FRONT, GL_EMISSION, [0, 0, 0, 1])
     
     glPushMatrix()
-    glUniform1i(p_shader_xray, True)
+    glUniform1i(p_shader_mode, 2) # xray
 
     try:
         glMultMatrixf(rotation_matrix.toList())
@@ -266,7 +277,7 @@ def draw_brain():
         glPopMatrix()
 
 def draw_electrodes():
-    global p_shader_xray
+    global p_shader_mode
 
     # Material front   
     glMaterialfv(GL_FRONT, GL_AMBIENT, [0.2, 0.2, 0.2, 1])
@@ -275,7 +286,7 @@ def draw_electrodes():
     glMaterialfv(GL_FRONT, GL_SHININESS, 0)
     glMaterialfv(GL_FRONT, GL_EMISSION, [0, 0, 0, 1])
 
-    glUniform1i(p_shader_xray, False)
+    glUniform1i(p_shader_mode, 1) # blinn
     
     glPushMatrix()
     glMultMatrixf(rotation_matrix.toList())
@@ -286,7 +297,7 @@ def draw_electrodes():
     glPopMatrix()
 
 def draw_electrode(position, label):
-    glColor3f(0, 0, 1)
+    glColor3f(0.18, 0.31, 0.31)
     glPushMatrix()
     glTranslate(position[0],  position[1],  position[2])
     draw_label(label)
@@ -297,7 +308,7 @@ def draw_label(text):
     global program 
     glUseProgram(0)
     glDisable(GL_LIGHTING)
-    glRasterPos2f(0, 6)
+    glRasterPos2f(0+2*zoom_factor, 3+2*zoom_factor)
     glutBitmapString(GLUT_BITMAP_HELVETICA_18, text)
     glEnable(GL_LIGHTING)
     glUseProgram(program)
@@ -309,7 +320,7 @@ def draw_source(position):
     glMaterialfv(GL_FRONT, GL_SHININESS, 0)
     glMaterialfv(GL_FRONT, GL_EMISSION, [0, 0, 0, 1])
 
-    glUniform1i(p_shader_xray, False)
+    glUniform1i(p_shader_mode, 1) # blinn
 
     glPushMatrix()
     glTranslate(position[0],  position[1],  position[2])
@@ -342,6 +353,17 @@ def draw_sources():
     for source in source_locations:
         draw_source(source)
     glPopMatrix()
+
+def draw_background(): 
+    glUniform1i(p_shader_mode, 0)
+    glBegin(GL_QUADS)
+    glColor3f(0.53, 0.81, 0.98)
+    glVertex3f(-300.0, -100.0, -200.0)
+    glVertex3f(300.0, -100.0, -200.0)
+    glColor3f(0.93, 0.91, 0.67)
+    glVertex3f(300.0, -100.0, 200.0)
+    glVertex3f(-300.0, -100.0, 200.0)
+    glEnd()   
 
 # Start the program
 main()
