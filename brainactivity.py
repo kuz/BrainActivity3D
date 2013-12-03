@@ -158,7 +158,9 @@ def display():
     glScale(zoom_factor, zoom_factor, zoom_factor)
     draw_sources()
     draw_electrodes()
+    glDepthMask(False)
     draw_brain()
+    glDepthMask(True)
     
     glEnable(GL_LIGHTING)
     # Switch buffers
