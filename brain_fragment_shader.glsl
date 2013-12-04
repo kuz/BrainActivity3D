@@ -10,7 +10,7 @@ uniform int shader_mode;
 
 
 float edgefalloff = 1.0;
-float intensity = 0.2;
+float intensity = 0.5;
 float ambient = 0.01;
 
 vec4 blinn(gl_LightSourceParameters light) {
@@ -44,7 +44,6 @@ void main()
         opac = abs(opac);
         opac = ambient + intensity*(1.0-pow(opac, edgefalloff));
         gl_FragColor =  color;// * exp(0.02 * (vertex_position.z + 300));
-        //gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
         gl_FragColor.a = opac;
     
     } else {

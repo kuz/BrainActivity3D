@@ -126,7 +126,7 @@ def reshape(w, h):
 def setProjectionMatrix (width, height):
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
-    gluPerspective (45.0, (3.0*width)/(4.0*height), 0.5, 500.0)
+    gluPerspective (45.0, (3.0*width)/(4.0*height), 0.5, 1000.0)
     glMatrixMode(GL_MODELVIEW)
     
 def display():
@@ -158,11 +158,14 @@ def display():
     glScale(zoom_factor, zoom_factor, zoom_factor)
     draw_sources()
     draw_electrodes()
-    glDepthMask(False)
+    #glDepthMask(False)
+    glColorMask(False, False, False, False)
     draw_brain()
-    glDepthMask(True)
-    
-    glEnable(GL_LIGHTING)
+    glDepthFunc(GL_LEQUAL)
+    glColorMask(True, True, True, True)
+    draw_brain()
+    #glDepthMask(True)
+   
     # Switch buffers
     glutSwapBuffers()
 
@@ -190,7 +193,7 @@ def mouse(button, state, x, y):
         prev_y = y
     # MouseWheel
     if button == 3:
-        if zoom_factor <= 20.0:
+        if zoom_factor <= 10.0:
             zoom_factor += 0.05
     if button == 4 :
         if zoom_factor >= 0.1:
@@ -258,14 +261,6 @@ def main():
 def draw_brain():
 
     global p_shader_mode
-    glColor3f(0, 0, 0)
-    
-    # Material front   
-    glMaterialfv(GL_FRONT, GL_AMBIENT, [0.2, 0.2, 0.2, 1])
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, [0.8, 0.8, 0.8, 1])
-    glMaterialfv(GL_FRONT, GL_SPECULAR, [0, 0, 0, 1])
-    glMaterialfv(GL_FRONT, GL_SHININESS, 0)
-    glMaterialfv(GL_FRONT, GL_EMISSION, [0, 0, 0, 1])
     
     glPushMatrix()
     glUniform1i(p_shader_mode, 2) # xray
@@ -289,7 +284,6 @@ def draw_electrodes():
     glMaterialfv(GL_FRONT, GL_EMISSION, [0, 0, 0, 1])
 
     glUniform1i(p_shader_mode, 1) # blinn
-    
     glPushMatrix()
     glMultMatrixf(rotation_matrix.toList())
     
@@ -360,11 +354,11 @@ def draw_background():
     glUniform1i(p_shader_mode, 0)
     glBegin(GL_QUADS)
     glColor3f(0.53, 0.81, 0.98)
-    glVertex3f(-300.0, -100.0, -200.0)
-    glVertex3f(300.0, -100.0, -200.0)
+    glVertex3f(-1000.0, -500.0, -340.0)
+    glVertex3f(1000.0, -500.0, -340.0)
     glColor3f(0.93, 0.91, 0.67)
-    glVertex3f(300.0, -100.0, 200.0)
-    glVertex3f(-300.0, -100.0, 200.0)
+    glVertex3f(1000.0, -500.0, 340.0)
+    glVertex3f(-1000.0, -500.0, 340.0)
     glEnd()   
 
 # Start the program
