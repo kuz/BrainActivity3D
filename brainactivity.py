@@ -205,6 +205,7 @@ def mouse(button, state, x, y):
         arcball_on = True
     else:
         acrball_on = False
+    
     # MouseWheel
     if button == 3:
         if zoom_factor <= 10.0:
@@ -247,7 +248,7 @@ def mouse_drag(x, y):
         curr_y = y
      
     # Arcball implementation:
-    if curr_x != prev_x and curr_y != prev_y:
+    if curr_x != prev_x or curr_y != prev_y:
         
         # Calculating two vectors to both mouse positions on the screen
         vec_to_first_click = get_arcball_vector(prev_x, prev_y)
