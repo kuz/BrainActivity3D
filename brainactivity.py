@@ -66,7 +66,7 @@ def initgl():
     glutCreateWindow('Brain Activity 3D')
    
     # Z-buffer
-    #glEnable(GL_DEPTH_TEST)
+    glEnable(GL_DEPTH_TEST)
 
     # Enable basic lighting
     glEnable(GL_LIGHTING)
@@ -160,9 +160,10 @@ def display():
     
     # Draw things
     draw_background()
-    glScale(zoom_factor, zoom_factor, zoom_factor)
+    #glScale(zoom_factor, zoom_factor, zoom_factor)
+    
     draw_sources()
-    draw_electrodes()
+
     #glDepthMask(False)
     glColorMask(False, False, False, False)
     draw_brain()
@@ -170,6 +171,8 @@ def display():
     glColorMask(True, True, True, True)
     draw_brain()
     #glDepthMask(True)
+
+    draw_electrodes()
    
     # Switch buffers
     glutSwapBuffers()
@@ -381,10 +384,16 @@ def draw_source(position):
 
     glUniform1i(p_shader_mode, 1) # blinn
 
+    glBlendColor(0, 0, 0, 0.2)
+    glBlendFunc(GL_CONSTANT_ALPHA, GL_ONE)
+
     glPushMatrix()
     glTranslate(position[0],  position[1],  position[2])
-    glutSolidSphere(5, 20, 20)
+    for i in range(10):
+        glScale(1.05, 1.05, 1.05)
+        glutSolidSphere(5, 20, 20)
     glPopMatrix()
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
 def localize_sources():
     '''

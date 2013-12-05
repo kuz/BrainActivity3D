@@ -37,7 +37,7 @@ void main()
     if (shader_mode == 0) {
         gl_FragColor = color;
     } else if (shader_mode == 1) {
-        vec4 c = gl_FrontMaterial.ambient * gl_LightModel.ambient + blinn(gl_LightSource[0]);
+        vec4 c = gl_FrontMaterial.emission + gl_FrontMaterial.ambient * gl_LightModel.ambient + blinn(gl_LightSource[0]);
         gl_FragColor = c;
     } else if (shader_mode == 2) {    
         float opac = dot(normalize(-normal), normalize(-distance_to_center));
