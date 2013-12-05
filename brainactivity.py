@@ -19,6 +19,7 @@ from threading import Thread
 from cgkit.cgtypes import *
 import traceback
 import time
+import math
 
 # Register global variables
 brain = None
@@ -27,9 +28,13 @@ epoc = None
 sample_sec = 5
 localizer = None
 source_locations = []
+# Rotation variables:
 rotation_matrix = mat4(1.0)
 prev_x = 0
 prev_y = 0
+curr_x = 0
+curr_y = 0
+arcball_on = False
 
 screen_w = 800
 screen_h = 600
@@ -54,7 +59,7 @@ def initgl():
     glutCreateWindow('Brain Activity 3D')
    
     # Z-buffer
-    glEnable(GL_DEPTH_TEST)
+    #glEnable(GL_DEPTH_TEST)
 
     # Enable basic lighting
     glEnable(GL_LIGHTING)
@@ -116,7 +121,7 @@ def reshape(w, h):
     glViewport(0, 0, w, h)
     setProjectionMatrix(w,h)
     
-def setProjectionMatrix (width, height):
+def setProjectionMatrix(width, height):
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
     gluPerspective (45.0*zoomFactor, (3.0*width)/(4.0*height), 0.5, 500.0)
@@ -170,10 +175,16 @@ def mouse(button, state, x, y):
     # Once we pressed the left button this corresponds to the start of the rotation
     global prev_x
     global prev_y
+    global arcball_on
     
     if state == GLUT_DOWN and button == GLUT_LEFT_BUTTON:
         prev_x = x
         prev_y = y
+        curr_x = x
+        curr_y = y
+        arcball_on = True
+    else:
+        acrball_on = False
     # MouseWheel
     if button == 3:
         if zoomFactor >= 0.2:
@@ -182,6 +193,24 @@ def mouse(button, state, x, y):
         if zoomFactor <= 3.0:
             zoomFactor += 0.1
     setProjectionMatrix(screen_w,screen_h)
+    
+    '''
+    Get a normalized vector from the center of the virtual ball O to a
+    point P on the virtual ball surface, such that P is aligned on
+    screen's (X,Y) coordinates.  If (X,Y) is too far away from the
+    sphere, return the nearest point on the virtual ball surface.
+    '''
+def get_arcball_vector(x, y):
+    global screen_w
+    global screen_h
+    P = vec3(1.0*x/screen_w*2 - 1.0, 1.0*y/screen_h*2 - 1.0, 0)
+    P.y = P.y
+    OP_squared = P.x * P.x + P.y * P.y
+    if OP_squared <= 1*1:
+        P.z = math.sqrt(1*1 - OP_squared)
+    else:
+        P = P.normalize()
+    return P 
         
 def mouse_drag(x, y):
     """
@@ -189,12 +218,44 @@ def mouse_drag(x, y):
     """
     global prev_x   # Location where mouse was pressed
     global prev_y
+    global curr_x   
+    global curr_y
     global rotation_matrix # Current rotation matrix
     
+    if arcball_on == True:
+        curr_x = x
+        curr_y = y
+     
+    # Arcball implementation:
+    if curr_x != prev_x and curr_y != prev_y:
+        
+        # Calculating two vectors to both mouse positions on the screen
+        vec_to_first_click = get_arcball_vector(prev_x, prev_y)
+        vec_to_second_click = get_arcball_vector(curr_x, curr_y)
+        
+        # Angle of the turn is calculated by taking a dot product between those two vectors
+        angle = math.acos(min(1.0, vec_to_first_click*vec_to_second_click))
+        
+        # Axis of a turn is calculated by taking a cross product
+        axis_in_camera_coord = vec_to_first_click.cross(vec_to_second_click)
+        
+        # Magic happens here, to be able to make a turn very intuitive shift y with z axis
+        z = axis_in_camera_coord.y
+        axis_in_camera_coord.y = -axis_in_camera_coord.z
+        axis_in_camera_coord.z = z       
+        
+        # Multiply current rotation with a new angle from the left
+        rotation_matrix = mat4(1.0).rotate(math.degrees(angle)/10.0, axis_in_camera_coord)*rotation_matrix
+        
+        # Save new coordinates as old
+        prev_x = curr_x
+        prev_y = curr_y
+    '''
     dx = x - prev_x
     dy = y - prev_y
    
     # Compute an 'object vector' which is a corresponding axis in object's coordinates
+    
     object_axis_vector = rotation_matrix.inverse()*vec3([0, 0, 1])
     rotation_matrix = rotation_matrix.rotate(360*3.14*dx/(screen_w * 180), object_axis_vector)
 
@@ -202,9 +263,10 @@ def mouse_drag(x, y):
     rotation_matrix = rotation_matrix.rotate(360*3.14*dy/(screen_h * 180), object_axis_vector)
     
     # Save current coordinates as old ones
+    
     prev_x = x
-    prev_y = y
-
+    prev_y = y'''
+    
 def keyboard(key, x, y):
     """
     Process keyboard events
