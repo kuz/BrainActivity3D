@@ -160,7 +160,7 @@ def display():
     
     # Draw things
     draw_background()
-    #glScale(zoom_factor, zoom_factor, zoom_factor)
+    glScale(zoom_factor, zoom_factor, zoom_factor)
     
     draw_sources()
 
