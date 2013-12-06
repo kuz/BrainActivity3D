@@ -39,7 +39,7 @@ class Epoc:
         self.sample_size = int(128 * float(sample_sec))
 
         # Load dummy data
-        f = open('data/201305161823-KT-mental-3-240.csv').readlines()
+        f = open('data/201305182224-DF-facial-3-420.csv').readlines()
         self.lines = [map(float, ln.split(',')) for ln in f]
         self.lines = np.asarray(self.lines)
         self.lines = np.delete(self.lines, [14,15,16], axis=1) # delete last 2 columns
