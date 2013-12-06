@@ -47,6 +47,8 @@ zoom_factor = 1.0
 #   2 - xray
 p_shader_mode = 0
 
+# Frame additional width
+frame_width = 0
 
 
 def initgl():
@@ -163,6 +165,7 @@ def display():
     # Draw things
     draw_background()
     glScale(zoom_factor, zoom_factor, zoom_factor)
+    draw_arcball_frames()
     
     draw_sources()
 
@@ -180,6 +183,7 @@ def display():
     glutSwapBuffers()
 
 
+    
 def idle():
     """
     Computation to be performed during idle
@@ -205,8 +209,10 @@ def mouse(button, state, x, y):
         curr_x = x
         curr_y = y
         arcball_on = True
+        frame_width = 0.6
     else:
         acrball_on = False
+        frame_width = 0.0
     
     # MouseWheel
     if button == 3:
@@ -346,6 +352,23 @@ def draw_brain():
         traceback.print_exc()
     finally:
         glPopMatrix()
+
+def draw_arcball_frames():
+    
+    glMaterialfv(GL_FRONT, GL_AMBIENT, [0.3, 0.3, 0.3, 1])
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, [0.3, 0.3, 0.3, 1])
+    glMaterialfv(GL_FRONT, GL_SPECULAR, [0, 0, 0, 1])
+    glMaterialfv(GL_FRONT, GL_SHININESS, 0)
+    glMaterialfv(GL_FRONT, GL_EMISSION, [0, 0, 0, 1])
+
+    glUniform1i(p_shader_mode, 1) # blinn
+    glPushMatrix()
+    glMultMatrixf(rotation_matrix.toList())
+    glTranslatef(0,-10,0)
+    glutWireTorus(0.3 + frame_width,105,200,200)
+    glRotatef(90,0,1,0)
+    glutWireTorus(0.3 + frame_width,105,200,200)
+    glPopMatrix()
 
 def draw_electrodes():
     global p_shader_mode
