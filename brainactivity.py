@@ -175,10 +175,10 @@ def display():
     
     # Draw text
     if(transparency_mode == True):
-        draw_text('Transparency mode: enabled',120,0,-100)
+        draw_text('Transparency mode: enabled',120,0,-110)
     else:
-        draw_text('Transparency mode: disabled',120,0,-100)
-    draw_text('Number of active sources: {}'.format(localizer.number_of_sources), 120,0,-110)
+        draw_text('Transparency mode: disabled',120,0,-110)
+    draw_text('Number of active sources: {}'.format(localizer.number_of_sources), 120,0,-120)
     
     glScale(zoom_factor, zoom_factor, zoom_factor)
     draw_sources()
