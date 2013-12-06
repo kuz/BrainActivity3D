@@ -47,7 +47,10 @@ zoom_factor = 1.0
 #   2 - xray
 p_shader_mode = 0
 
-
+# Drawing mode for the brain
+#   0 - solid model
+#   1 - xray
+transparency_mode = False
 
 def initgl():
     """
@@ -167,14 +170,17 @@ def display():
     glScale(zoom_factor, zoom_factor, zoom_factor)
     
     draw_sources()
-
-    #glDepthMask(False)
-    glColorMask(False, False, False, False)
-    draw_brain()
-    glDepthFunc(GL_LEQUAL)
-    glColorMask(True, True, True, True)
-    draw_brain()
-    #glDepthMask(True)
+    
+    if transparency_mode == True:
+        glDepthMask(False)
+        draw_brain()
+        glDepthMask(True)
+    else:
+        glColorMask(False, False, False, False)
+        draw_brain()
+        glDepthFunc(GL_LEQUAL)
+        glColorMask(True, True, True, True)
+        draw_brain()
 
     draw_electrodes()
    
@@ -299,6 +305,7 @@ def keyboard(key, x, y):
     global rotation_matrix
     global localizer_thread_alive
     global epoc
+    global transparency_mode
     
     if key == GLUT_KEY_LEFT:
         # Compute an 'object vector' which is a corresponding axis in object's coordinates  
@@ -318,7 +325,16 @@ def keyboard(key, x, y):
         localizer_thread_alive = False
         epoc.thread_alive = False
         exit(0)
-
+    elif key == 't':
+        if transparency_mode == False:
+            transparency_mode = True
+            print "Transparency mode switched on"
+        
+        else:
+            transparency_mode = False
+            print "Transparency mode switched off"
+        
+        
 def init_model():
     """
     Load model from Wavefront .obj file
