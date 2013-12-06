@@ -44,7 +44,7 @@ class Epoc:
         self.lines = np.asarray(self.lines)
         self.lines = np.delete(self.lines, [14,15,16], axis=1) # delete last 2 columns
         self.lastline = 0
-   
+        
     def get_packet(self):
         '''
         Get one packet from the device packet queue
@@ -77,7 +77,7 @@ class Epoc:
         '''
         while True:
             self.sample = self.read_next_sample()
-            time.sleep(self.sample_sec)
+            time.sleep(0.05)
 
     def read_next_sample_dummy(self):
         if self.lastline + self.sample_size >= self.lines.shape[0]:
@@ -91,7 +91,7 @@ class Epoc:
         '''
         while self.thread_alive:
             self.sample = self.read_next_sample_dummy()
-            time.sleep(self.sample_sec)
+            time.sleep(0.05)
 
 
 

@@ -16,6 +16,8 @@ from scipy.optimize import minimize
 from sklearn.decomposition import PCA
 from sympy import solve_poly_system, sympify
 import operator
+import time
+import random
 
 class SourceLocalizer:
 
@@ -52,11 +54,16 @@ class SourceLocalizer:
         Return
             (x, y, z, k)
         '''
+        self.electrode_data = []
         for i,coordinate in enumerate(self.epoc.coordinates):
             self.electrode_data.append({'position':coordinate[0], 'contribution': self.mixing_matrix[i][source]}) 
-
-        result = minimize(self.error, self.last_source_locations.get(source, [0, 0, 0, 1]), method='Nelder-Mead')
+        
+        start_time = time.time()
+        result = minimize(self.error, self.last_source_locations.get(source, [0, 0, 0, 1]), method='Nelder-Mead')     
+        #result = minimize(self.error,  [0, 0, 0, 1], method='Nelder-Mead')
+        print time.time() - start_time, "maximize"
         return result.x
+        #return result
         
         """
         #self.electrode_data = sorted(self.electrode_data, key=lambda k: k['contribution'], reverse=False)
@@ -95,9 +102,11 @@ class SourceLocalizer:
     def contribution_estimate(self, source_pos, electrode_pos, k):
         return k / (sum((source_pos - electrode_pos)**2) + 1)
 
-    def localize(self, source):
+    def localize(self, source):   
         self.ica()
+        #start_time = time.time()
         (x, y, z, k) = self.optimize(source)
+        #print time.time()-start_time, "minimization"
         self.last_source_locations[source] = [x, y, z, k]
         return [x, y, z]
 

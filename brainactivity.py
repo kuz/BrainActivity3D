@@ -437,13 +437,14 @@ def localize_sources():
     while localizer_thread_alive:
         localizer.set_data(epoc.sample)
         locations = []
+        start_time = time.time()
         for sn in range(localizer.number_of_sources):
             locations.append(localizer.localize(sn))
 
         source_locations = locations
 
-        time.sleep(sample_sec)
-
+        time.sleep(0.05)
+        print time.time() - start_time, "total time"
 def draw_sources():
     global source_locations
 
