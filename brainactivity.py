@@ -150,6 +150,7 @@ def display():
     global screen_h
     global brain
     global p_shader_mode
+    global localizer
     
     # Clear screen
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -163,11 +164,21 @@ def display():
     glLightfv(GL_LIGHT0, GL_SPECULAR, [1, 1, 1, 1])
     glLightfv(GL_LIGHT0, GL_POSITION, [0, 0, 1, 0])
     
-    # Set up the camera    
+    # Set up the camera 
+    
+    
     gluLookAt(0, 300, 0, 0, 0, 0, 0, 0, 1)
+    
     
     # Draw things
     draw_background()
+    
+    # Draw text
+    if(transparency_mode == True):
+        draw_text('Transparency mode: enabled',120,0,-110)
+    else:
+        draw_text('Transparency mode: disabled',120,0,-110)
+    draw_text('Number of active sources: {}'.format(localizer.number_of_sources), 120,0,-120)
     
     glScale(zoom_factor, zoom_factor, zoom_factor)
     draw_sources()
@@ -405,6 +416,16 @@ def draw_label(text):
     glEnable(GL_LIGHTING)
     glUseProgram(program)
 
+def draw_text(text, x, y, z):
+    global program 
+    glColor3f(0.3, 0.3, 0.3)
+    glUseProgram(0)
+    glDisable(GL_LIGHTING)
+    glRasterPos3f(x, y, z)
+    glutBitmapString(GLUT_BITMAP_HELVETICA_18, text)
+    glEnable(GL_LIGHTING)
+    glUseProgram(program)
+    
 def draw_source(position):    
     glMaterialfv(GL_FRONT, GL_AMBIENT, [0.2, 0.2, 0.2, 1])
     glMaterialfv(GL_FRONT, GL_DIFFUSE, [0.9, 0.3, 0.3, 1])
