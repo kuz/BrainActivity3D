@@ -123,17 +123,20 @@ def createMenu():
     global menu
     menu = glutCreateMenu(processMenuEvents)  
     glutAddMenuEntry("Change transparency mode - T", 1)
-    glutAddMenuEntry("Return to initial view - I", 2)  
+    glutAddMenuEntry("Initial view - I", 2)  
     glutAttachMenu(GLUT_RIGHT_BUTTON)
     return 0
 
 def processMenuEvents(option):    
     global arcball_on
+    global rotation_matrix
+    
     arcball_on = False
     if option == 1:
         change_transparency_mode()
     elif option == 2:
-        gluLookAt(0, 300, 0, 0, 0, 0, 0, 0, 1)
+        rotation_matrix = mat4(1.0)
+        glLoadIdentity()
     
 def initepoc():
     global epoc
@@ -194,6 +197,7 @@ def display():
     
     glPushMatrix()
     glScale(zoom_factor, zoom_factor, zoom_factor)
+    glRotatef(-90,0,0,1)
     draw_sources()
     
     if transparency_mode == True:
@@ -306,10 +310,13 @@ def mouse_drag(x, y):
         axis_in_camera_coord = vec_to_first_click.cross(vec_to_second_click)
         
         # Magic happens here, to be able to make a turn very intuitive shift y with z axis
-        z = axis_in_camera_coord.y
-        axis_in_camera_coord.y = -axis_in_camera_coord.z
-        axis_in_camera_coord.z = z       
+        x = axis_in_camera_coord.y
+        axis_in_camera_coord.y = axis_in_camera_coord.x
+        axis_in_camera_coord.x = x       
         
+        z = axis_in_camera_coord.x
+        axis_in_camera_coord.x = axis_in_camera_coord.z
+        axis_in_camera_coord.z = z
         # Multiply current rotation with a new angle from the left
         rotation_matrix = mat4(1.0).rotate(math.degrees(angle)/30.0, axis_in_camera_coord)*rotation_matrix
         
@@ -359,8 +366,11 @@ def keyboard(key, x, y):
         localizer_thread_alive = False
         epoc.thread_alive = False
         exit(0)
-    elif key == 't':
+    elif key == 't' or key == 'T':
         change_transparency_mode()
+    elif key == 'i' or key == 'I':
+        rotation_matrix = mat4(1.0)
+        glLoadIdentity()
         
 def change_transparency_mode():
     global transparency_mode
