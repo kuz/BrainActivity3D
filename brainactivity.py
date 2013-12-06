@@ -268,7 +268,7 @@ def mouse_drag(x, y):
         axis_in_camera_coord.z = z       
         
         # Multiply current rotation with a new angle from the left
-        rotation_matrix = mat4(1.0).rotate(math.degrees(angle)/10.0, axis_in_camera_coord)*rotation_matrix
+        rotation_matrix = mat4(1.0).rotate(math.degrees(angle)/30.0, axis_in_camera_coord)*rotation_matrix
         
         # Save new coordinates as old
         prev_x = curr_x
