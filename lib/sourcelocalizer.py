@@ -1,8 +1,8 @@
 """
 
 Implementation of Source Localization
-    * Estimate electrode contibutions using ica
-    * Optimize for (x, y, z, k), where k is coefficient to confert ICA's output to the distance
+    * Estimate electrode contributions using ica
+    * Optimize for (x, y, z, k), where k is coefficient to convert ICA's output to the distance
 
 TODO:
     * Check that constant k is same all the time (otherwise the result does not make sense)
@@ -37,7 +37,7 @@ class SourceLocalizer:
         '''
         Perform ICA on the data
             source_matrix -- rows are sources, columns are time points, values are ?
-            mixing_matrix -- rows are electodes, columns are source, values are contibutions of the electrode to the source
+            mixing_matrix -- rows are electrodes, columns are source, values are contributions of the electrode to the source
         '''
         ica = FastICA(self.number_of_sources)
         ica.fit(self.data)
@@ -86,10 +86,10 @@ class SourceLocalizer:
     def error(self, configuration):
         source_pos = configuration[0:3]
         k = configuration[3]
-
+        alpha = 0
         s = 0
         for electrode in self.electrode_data:
-            s += (electrode['contribution'] - self.contribution_estimate(source_pos, electrode['position'], k))**2
+            s += (electrode['contribution'] - self.contribution_estimate(source_pos, electrode['position'], k))**2 + alpha*(sum((source_pos - electrode['position'])**2) + 1)
         return s
 
     def contribution_estimate(self, source_pos, electrode_pos, k):

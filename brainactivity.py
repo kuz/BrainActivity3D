@@ -25,7 +25,7 @@ import math
 brain = None
 program = None
 epoc = None
-sample_sec = 5
+sample_sec = 0.5
 localizer = None
 source_locations = []
 localizer_thread_alive = True
