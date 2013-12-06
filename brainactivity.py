@@ -173,13 +173,7 @@ def display():
     # Draw things
     draw_background()
     
-    # Draw text
-    if(transparency_mode == True):
-        draw_text('Transparency mode: enabled',120,0,-110)
-    else:
-        draw_text('Transparency mode: disabled',120,0,-110)
-    draw_text('Number of active sources: {}'.format(localizer.number_of_sources), 120,0,-120)
-    
+    glPushMatrix()
     glScale(zoom_factor, zoom_factor, zoom_factor)
     draw_sources()
     
@@ -195,7 +189,15 @@ def display():
         draw_brain()
 
     draw_electrodes()
-   
+    glPopMatrix()
+    
+    # Draw text
+    if(transparency_mode == True):
+        draw_text('Transparency mode: enabled',120,0,-110)
+    else:
+        draw_text('Transparency mode: disabled',120,0,-110)
+    draw_text('Number of active sources: {}'.format(len(source_locations)), 120,0,-120)
+    
     # Switch buffers
     glutSwapBuffers()
 
