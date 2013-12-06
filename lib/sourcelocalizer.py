@@ -93,7 +93,7 @@ class SourceLocalizer:
     def error(self, configuration):
         source_pos = configuration[0:3]
         k = configuration[3]
-        alpha = 0
+        alpha = 0.3
         s = 0
         for electrode in self.electrode_data:
             s += (electrode['contribution'] - self.contribution_estimate(source_pos, electrode['position'], k))**2 + alpha*(sum((source_pos - electrode['position'])**2) + 1)
