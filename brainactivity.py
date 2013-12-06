@@ -53,6 +53,9 @@ p_shader_mode = 0
 #   1 - xray
 transparency_mode = False
 
+# Menu
+menu = None
+
 def initgl():
     """
     Initialize OpenGL and GLUT
@@ -70,6 +73,9 @@ def initgl():
     glutInitWindowSize(screen_w, screen_h)
     glutInitWindowPosition(200,50);
     glutCreateWindow('Brain Activity 3D')
+    
+    # Create menu
+    createMenu()
    
     # Z-buffer
     glEnable(GL_DEPTH_TEST)
@@ -113,6 +119,22 @@ def initgl():
     # Start main loop
     glutMainLoop()
 
+def createMenu():
+    global menu
+    menu = glutCreateMenu(processMenuEvents)  
+    glutAddMenuEntry("Change transparency mode - T", 1)
+    glutAddMenuEntry("Return to initial view - I", 2)  
+    glutAttachMenu(GLUT_RIGHT_BUTTON)
+    return 0
+
+def processMenuEvents(option):    
+    global arcball_on
+    arcball_on = False
+    if option == 1:
+        change_transparency_mode()
+    elif option == 2:
+        gluLookAt(0, 300, 0, 0, 0, 0, 0, 0, 1)
+    
 def initepoc():
     global epoc
     epoc = Epoc(sample_sec)
@@ -165,10 +187,7 @@ def display():
     glLightfv(GL_LIGHT0, GL_POSITION, [0, 0, 1, 0])
     
     # Set up the camera 
-    
-    
     gluLookAt(0, 300, 0, 0, 0, 0, 0, 0, 1)
-    
     
     # Draw things
     draw_background()
@@ -209,6 +228,8 @@ def idle():
     """
     display()
 
+menu_mode = False
+
 def mouse(button, state, x, y):
     """
     Process mouse events
@@ -228,9 +249,10 @@ def mouse(button, state, x, y):
         curr_x = x
         curr_y = y
         arcball_on = True
-    else:
-        acrball_on = False
     
+    if state == GLUT_UP and button == GLUT_LEFT_BUTTON:
+        acrball_on = False
+
     # MouseWheel
     if button == 3:
         if zoom_factor <= 10.0:
@@ -270,10 +292,9 @@ def mouse_drag(x, y):
     if arcball_on == True:
         curr_x = x
         curr_y = y
-     
+    
     # Arcball implementation:
-    if curr_x != prev_x or curr_y != prev_y:
-        
+    if (curr_x != prev_x or curr_y != prev_y) and arcball_on == True:
         # Calculating two vectors to both mouse positions on the screen
         vec_to_first_click = get_arcball_vector(prev_x, prev_y)
         vec_to_second_click = get_arcball_vector(curr_x, curr_y)
@@ -319,7 +340,6 @@ def keyboard(key, x, y):
     global rotation_matrix
     global localizer_thread_alive
     global epoc
-    global transparency_mode
     
     if key == GLUT_KEY_LEFT:
         # Compute an 'object vector' which is a corresponding axis in object's coordinates  
@@ -340,16 +360,18 @@ def keyboard(key, x, y):
         epoc.thread_alive = False
         exit(0)
     elif key == 't':
-        if transparency_mode == False:
-            transparency_mode = True
-            
-            print "Transparency mode switched on"
+        change_transparency_mode()
         
-        else:
-            transparency_mode = False
-            print "Transparency mode switched off"
+def change_transparency_mode():
+    global transparency_mode
+    if transparency_mode == False:
+        transparency_mode = True
+        print "Transparency mode switched on"
         
-        
+    else:
+        transparency_mode = False
+        print "Transparency mode switched off"
+
 def init_model():
     """
     Load model from Wavefront .obj file
