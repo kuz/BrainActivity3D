@@ -46,7 +46,15 @@ void main()
         gl_FragColor =  color;// * exp(0.02 * (vertex_position.z + 300));
         gl_FragColor.a = opac;
     
-    } else {
+    } else if (shader_mode == 3) {    
+        float opac = dot(normalize(-normal), normalize(-distance_to_center));
+        opac = abs(opac);
+        opac = ambient + intensity/3.0*(1.0-pow(opac, edgefalloff));
+        gl_FragColor =  color;// * exp(0.02 * (vertex_position.z + 300));
+        gl_FragColor.a = opac;
+    
+    }
+    else {
         gl_FragColor = vec4(0.5,0.5,0.5,1.0);
     }
 }

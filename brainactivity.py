@@ -45,6 +45,7 @@ zoom_factor = 1.0
 #   0 - simple color
 #   1 - blinn model
 #   2 - xray
+#   3 - xray with half of the intensity
 p_shader_mode = 0
 
 # Drawing mode for the brain
@@ -167,8 +168,8 @@ def display():
     
     # Draw things
     draw_background()
-    glScale(zoom_factor, zoom_factor, zoom_factor)
     
+    glScale(zoom_factor, zoom_factor, zoom_factor)
     draw_sources()
     
     if transparency_mode == True:
@@ -328,6 +329,7 @@ def keyboard(key, x, y):
     elif key == 't':
         if transparency_mode == False:
             transparency_mode = True
+            
             print "Transparency mode switched on"
         
         else:
@@ -349,13 +351,15 @@ def main():
     initepoc()
     initsourceloc()
     initgl()
-
+        
 def draw_brain():
 
     global p_shader_mode
     
     glPushMatrix()
-    glUniform1i(p_shader_mode, 2) # xray
+    if(transparency_mode == False):
+        glUniform1i(p_shader_mode, 2) # xray
+    else: glUniform1i(p_shader_mode, 3) # xray with half of the intenisty
 
     try:
         glMultMatrixf(rotation_matrix.toList())
