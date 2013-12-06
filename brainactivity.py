@@ -28,6 +28,8 @@ epoc = None
 sample_sec = 5
 localizer = None
 source_locations = []
+localizer_thread_alive = True
+
 # Rotation variables:
 rotation_matrix = mat4(1.0)
 prev_x = 0
@@ -293,14 +295,16 @@ def keyboard(key, x, y):
     Process keyboard events
     """
     global rotation_matrix
+    global localizer_thread_alive
+    global epoc
     
     if key == GLUT_KEY_LEFT:
         # Compute an 'object vector' which is a corresponding axis in object's coordinates  
         object_axis_vector = rotation_matrix.inverse()*vec3([0, 0, 1])
-        rotation_matrix = rotation_matrix.rotate(3.14/90, object_axis_vector)
+        rotation_matrix = rotation_matrix.rotate(-3.14/90, object_axis_vector)
     if key == GLUT_KEY_RIGHT:
         object_axis_vector = rotation_matrix.inverse()*vec3([0, 0, 1])
-        rotation_matrix = rotation_matrix.rotate(-3.14/90, object_axis_vector)
+        rotation_matrix = rotation_matrix.rotate(3.14/90, object_axis_vector)
     if key == GLUT_KEY_UP:
         object_axis_vector = rotation_matrix.inverse()*vec3([1, 0, 0])
         rotation_matrix = rotation_matrix.rotate(3.14/90, object_axis_vector)
@@ -308,6 +312,9 @@ def keyboard(key, x, y):
         object_axis_vector = rotation_matrix.inverse()*vec3([1, 0, 0])
         rotation_matrix = rotation_matrix.rotate(-3.14/90, object_axis_vector)
     elif key == chr(27):
+        print "Shutting down threads ..."
+        localizer_thread_alive = False
+        epoc.thread_alive = False
         exit(0)
 
 def init_model():
@@ -403,8 +410,9 @@ def localize_sources():
     global localizer
     global source_locations
     global sample_sec
+    global localizer_thread_alive
 
-    while True:
+    while localizer_thread_alive:
         localizer.set_data(epoc.sample)
         locations = []
         for sn in range(localizer.number_of_sources):
