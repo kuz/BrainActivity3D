@@ -57,13 +57,10 @@ class SourceLocalizer:
         self.electrode_data = []
         for i,coordinate in enumerate(self.epoc.coordinates):
             self.electrode_data.append({'position':coordinate[0], 'contribution': self.mixing_matrix[i][source]}) 
-        
-        start_time = time.time()
+
         result = minimize(self.error, self.last_source_locations.get(source, [0, 0, 0, 1]), method='Nelder-Mead')     
-        #result = minimize(self.error,  [0, 0, 0, 1], method='Nelder-Mead')
-        print time.time() - start_time, "maximize"
         return result.x
-        #return result
+       
         
         """
         #self.electrode_data = sorted(self.electrode_data, key=lambda k: k['contribution'], reverse=False)
@@ -104,9 +101,7 @@ class SourceLocalizer:
 
     def localize(self, source):   
         self.ica()
-        #start_time = time.time()
         (x, y, z, k) = self.optimize(source)
-        #print time.time()-start_time, "minimization"
         self.last_source_locations[source] = [x, y, z, k]
         return [x, y, z]
 

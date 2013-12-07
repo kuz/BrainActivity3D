@@ -25,7 +25,7 @@ import math
 brain = None
 program = None
 epoc = None
-sample_sec = 0.5
+sample_sec = 2.0
 localizer = None
 source_locations = []
 localizer_thread_alive = True
@@ -203,13 +203,14 @@ def display():
     global brain
     global p_shader_mode
     global localizer
+    global scene_id
     
     # Clear screen
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     # Initialize view-transform matrix
     glLoadIdentity()
-    
+
     # Light source 0
     glLightfv(GL_LIGHT0, GL_AMBIENT, [0, 0, 0, 1])
     glLightfv(GL_LIGHT0, GL_DIFFUSE, [1, 1, 1, 1])
@@ -221,7 +222,8 @@ def display():
     
     # Draw things
     draw_background()
-    if scene_id:
+    
+    if scene_id == 1:
         brain_scene()
     else:
         help_scene()
@@ -234,6 +236,7 @@ def brain_scene():
     glScale(zoom_factor, zoom_factor, zoom_factor)
     glRotatef(-90,0,0,1)
     draw_sources()
+    #draw_lobes()
     
     if transparency_mode == True:
         glDepthMask(False)
@@ -245,16 +248,13 @@ def brain_scene():
         glDepthFunc(GL_LEQUAL)
         glColorMask(True, True, True, True)
         draw_brain()
+
     draw_electrodes()
     glPopMatrix()
-        
-    # Draw text
-    if(transparency_mode == True):
-        draw_text('Transparency mode: enabled',120,0,-110)
-    else:
-        draw_text('Transparency mode: disabled',120,0,-110)
-    draw_text('Number of active sources: {}'.format(len(source_locations)), 120,0,-120)
-
+    
+    # Display info
+    display_info()
+    
 def help_scene():
     # Draw text
     draw_text('BrainActivity3D',110,0,60)
@@ -445,7 +445,7 @@ def draw_brain():
     glPushMatrix()
     if(transparency_mode == False):
         glUniform1i(p_shader_mode, 2) # xray
-    else: glUniform1i(p_shader_mode, 3) # xray with half of the intenisty
+    else: glUniform1i(p_shader_mode, 3) # xray with half of the intensity
 
     try:
         glMultMatrixf(rotation_matrix.toList())
@@ -539,7 +539,7 @@ def localize_sources():
 
         source_locations = locations
 
-        time.sleep(0.05)
+        time.sleep(1.0)
         print time.time() - start_time, "total time"
 def draw_sources():
     global source_locations
@@ -561,6 +561,54 @@ def draw_background():
     glVertex3f(-1000.0, -500.0, 340.0)
     glEnd()   
 
+def draw_lobes(): 
+    glUniform1i(p_shader_mode, 0)
+    glPushMatrix()
+    glMultMatrixf(rotation_matrix.toList())
+    draw_plane(-80,80,80,-80,75,75,75,75,-45,-45,60,60)         # frontal lobe
+    draw_plane(-80,80,80,-80,25,25,25,25,-10,-10,60,60)         # motor cortex
+    draw_plane(-80,80,80,-80,0,0,0,0,-10,-10,60,60)             # motor cortex
+    draw_plane(-80,80,80,-80,-20,-20,-20,-20,-10,-10,60,60)     # sensory cortex
+    draw_plane(-80,-80,80,80,25,-60,-60,25,-10,-10,-10,-10)     # temporal lobe
+    draw_plane(-80,-80,80,80,25,-60,-60,25,-60,-60,-60,-60)     # temporal lobe
+    draw_plane(-80,80,80,-80,-60,-60,-60,-60,-30,-30,60,60)     # parietal lobe
+    draw_plane(-80,80,80,-80,-105,-105,-105,-105,-30,-30,60,60) # occipital lobe
+    glPopMatrix()
+    
+def draw_plane(x1,x2,x3,x4,y1,y2,y3,y4,z1,z2,z3,z4): 
+    #LEFT
+    glBegin(GL_POLYGON)
+    glColor3f(  0.5,  0.5, 0.5 )
+    glVertex3f( x1, y1,  z1 )
+    glVertex3f( x2,  y2,  z2 )
+    glVertex3f( x3,  y3,  z3)
+    glVertex3f( x4, y4, z4 )
+    glEnd()
+   
+def identify_lobe(pos):
+    if -80 <= pos[0] and pos[0] < 80 and 25 <= pos[1] and pos[1] < 75 and -45 <= pos[2] and pos[2] < 60:
+        return ("Frontal lobe", "planning, emotions, problem solving")
+    if -80 <= pos[0] and pos[0] < 80 and 0 <= pos[1] and pos[1] < 25 and -10 <= pos[2] and pos[2] < 60:
+        return ("Motor cortex", "movement")
+    if -80 <= pos[0] and pos[0] < 80 and -20 <= pos[1] and pos[1] < 0 and -10 <= pos[2] and pos[2] < 60:
+        return ("Sensory cortex", "sensations")
+    if -80 <= pos[0] and pos[0] < 80 and -60 <= pos[1] and pos[1] < 25 and -60 <= pos[2] and pos[2] < -10:
+        return ("Temporal lobe", "memory, understanding, language")
+    if -80 <= pos[0] and pos[0] < 80 and -60 <= pos[1] and pos[1] < -20 and -10 <= pos[2] and pos[2] < 60:
+        return ("Parietal lobe", "perception, arithmetic, spelling")
+    if -80 <= pos[0] and pos[0] < 80 and -105 <= pos[1] and pos[1] < -60 and -30 <= pos[2] and pos[2] < 60:
+        return ("Occipital lobe", "vision")
+ 
+    return ("Unknown", "noisy signal")
+    
+def display_info():
+    global transparency_mode
+    global source_locations
+    
+    for i, sn in enumerate(source_locations):
+        lobe = identify_lobe(sn)
+        draw_text('Source %d: %s (%s)' % (i + 1, lobe[0], lobe[1]), 120, 0, -120 + 10 * len(source_locations) - (i + 1) * 10)
+   
 # Start the program
 main()
 

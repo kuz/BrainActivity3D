@@ -93,10 +93,3 @@ class Epoc:
             self.sample = self.read_next_sample_dummy()
             time.sleep(0.05)
 
-
-
-
-
-
-
-
