@@ -132,6 +132,7 @@ def createMenu():
     glutAddMenuEntry("Change transparency mode - T", 1)
     glutAddMenuEntry("Initial view - I", 2)
     glutAddSubMenu("Display:", menu)
+    glutAddMenuEntry("Quit - ESC", 3)
     
     glutAttachMenu(GLUT_RIGHT_BUTTON)
     return 0
@@ -149,6 +150,8 @@ def processMenuEvents(option):
 def processMainMenu(option):    
     global arcball_on
     global rotation_matrix
+    global localizer_thread_alive
+    global epoc
     
     arcball_on = False
     if option == 1:
@@ -156,7 +159,12 @@ def processMainMenu(option):
     elif option == 2:
         rotation_matrix = mat4(1.0)
         glLoadIdentity()
-            
+    elif option == 3:
+        print "Shutting down threads ..."
+        localizer_thread_alive = False
+        epoc.thread_alive = False
+        exit(0)
+
 def initepoc():
     global epoc
     epoc = Epoc(sample_sec)
