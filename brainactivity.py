@@ -56,6 +56,9 @@ transparency_mode = False
 # Menu
 menu = None
 
+# Scene Id
+scene_id = 1
+
 def initgl():
     """
     Initialize OpenGL and GLUT
@@ -122,12 +125,28 @@ def initgl():
 def createMenu():
     global menu
     menu = glutCreateMenu(processMenuEvents)  
+    glutAddMenuEntry("Help - H", 1)
+    glutAddMenuEntry("Brain - B", 2)
+    
+    mainMenu = glutCreateMenu(processMainMenu);
     glutAddMenuEntry("Change transparency mode - T", 1)
-    glutAddMenuEntry("Initial view - I", 2)  
+    glutAddMenuEntry("Initial view - I", 2)
+    glutAddSubMenu("Display:", menu)
+    
     glutAttachMenu(GLUT_RIGHT_BUTTON)
     return 0
 
 def processMenuEvents(option):    
+    global arcball_on
+    global scene_id
+    
+    arcball_on = False
+    if option == 1:
+        scene_id = 0
+    elif option == 2:
+        scene_id = 1
+
+def processMainMenu(option):    
     global arcball_on
     global rotation_matrix
     
@@ -137,7 +156,7 @@ def processMenuEvents(option):
     elif option == 2:
         rotation_matrix = mat4(1.0)
         glLoadIdentity()
-    
+            
 def initepoc():
     global epoc
     epoc = Epoc(sample_sec)
@@ -182,7 +201,7 @@ def display():
     
     # Initialize view-transform matrix
     glLoadIdentity()
-
+    
     # Light source 0
     glLightfv(GL_LIGHT0, GL_AMBIENT, [0, 0, 0, 1])
     glLightfv(GL_LIGHT0, GL_DIFFUSE, [1, 1, 1, 1])
@@ -194,7 +213,15 @@ def display():
     
     # Draw things
     draw_background()
-    
+    if scene_id:
+        brain_scene()
+    else:
+        help_scene()
+
+    # Switch buffers
+    glutSwapBuffers()
+
+def brain_scene():
     glPushMatrix()
     glScale(zoom_factor, zoom_factor, zoom_factor)
     glRotatef(-90,0,0,1)
@@ -210,29 +237,30 @@ def display():
         glDepthFunc(GL_LEQUAL)
         glColorMask(True, True, True, True)
         draw_brain()
-
     draw_electrodes()
     glPopMatrix()
-    
+        
     # Draw text
     if(transparency_mode == True):
         draw_text('Transparency mode: enabled',120,0,-110)
     else:
         draw_text('Transparency mode: disabled',120,0,-110)
     draw_text('Number of active sources: {}'.format(len(source_locations)), 120,0,-120)
-    
-    # Switch buffers
-    glutSwapBuffers()
 
+def help_scene():
+    # Draw text
+    draw_text('BrainActivity3D',110,0,60)
+    draw_text('In the computational neuroscience lab we have small EEG device (http://www.emotiv.com). ',110,0,40) 
+    draw_text('The device has 14 electrodes to measure electrical activity of a brain in 14 points ',110,0,30) 
+    draw_text('on the surface of a head. The signal itself, as you can imagine, is not born on the surface of ',110,0,20) 
+    draw_text('the head, but somewhere inside of it. The purpose of this project is to locate ',110,0,10)
+    draw_text('and visualize this "somewhere"', 110, 0, 0)
 
-    
 def idle():
     """
     Computation to be performed during idle
     """
     display()
-
-menu_mode = False
 
 def mouse(button, state, x, y):
     """
@@ -347,6 +375,7 @@ def keyboard(key, x, y):
     global rotation_matrix
     global localizer_thread_alive
     global epoc
+    global scene_id
     
     if key == GLUT_KEY_LEFT:
         # Compute an 'object vector' which is a corresponding axis in object's coordinates  
@@ -356,10 +385,10 @@ def keyboard(key, x, y):
         object_axis_vector = rotation_matrix.inverse()*vec3([0, 0, 1])
         rotation_matrix = rotation_matrix.rotate(3.14/90, object_axis_vector)
     if key == GLUT_KEY_UP:
-        object_axis_vector = rotation_matrix.inverse()*vec3([1, 0, 0])
+        object_axis_vector = rotation_matrix.inverse()*vec3([0, 1, 0])
         rotation_matrix = rotation_matrix.rotate(3.14/90, object_axis_vector)
     if key == GLUT_KEY_DOWN:
-        object_axis_vector = rotation_matrix.inverse()*vec3([1, 0, 0])
+        object_axis_vector = rotation_matrix.inverse()*vec3([0, 1, 0])
         rotation_matrix = rotation_matrix.rotate(-3.14/90, object_axis_vector)
     elif key == chr(27):
         print "Shutting down threads ..."
@@ -371,7 +400,11 @@ def keyboard(key, x, y):
     elif key == 'i' or key == 'I':
         rotation_matrix = mat4(1.0)
         glLoadIdentity()
-        
+    elif key == 'h' or key == 'H':
+        scene_id = 0
+    elif key == 'b' or key == 'B':
+        scene_id = 1
+            
 def change_transparency_mode():
     global transparency_mode
     if transparency_mode == False:
