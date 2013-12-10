@@ -491,16 +491,6 @@ def draw_label(text):
     glEnable(GL_LIGHTING)
     glUseProgram(program)
 
-def draw_text(text, x, y, z):
-    global program 
-    glColor3f(0.3, 0.3, 0.3)
-    glUseProgram(0)
-    glDisable(GL_LIGHTING)
-    glRasterPos3f(x, y, z)
-    glutBitmapString(GLUT_BITMAP_HELVETICA_18, text)
-    glEnable(GL_LIGHTING)
-    glUseProgram(program)
-    
 def draw_source(position):    
     glMaterialfv(GL_FRONT, GL_AMBIENT, [0.2, 0.2, 0.2, 1])
     glMaterialfv(GL_FRONT, GL_DIFFUSE, [0.9, 0.3, 0.3, 1])
@@ -584,7 +574,35 @@ def draw_plane(x1,x2,x3,x4,y1,y2,y3,y4,z1,z2,z3,z4):
     glVertex3f( x3,  y3,  z3)
     glVertex3f( x4, y4, z4 )
     glEnd()
-   
+    
+def draw_text(x, y, font, text):
+    glRasterPos2f(x,y)
+    glutBitmapString(font, text)
+
+def display_info():
+    global screen_w
+    global screen_h
+    global transparency_mode
+    global source_locations
+    
+    glMatrixMode(GL_PROJECTION)
+    glPushMatrix()
+    glLoadIdentity()
+    glOrtho(0.0, screen_w, screen_h, 0.0, -1.0, 10.0)
+    glMatrixMode(GL_MODELVIEW)
+    glLoadIdentity()
+
+    glClear(GL_DEPTH_BUFFER_BIT)
+    glColor3f(0.3, 0.3, 0.3)
+    
+    for i, sn in enumerate(source_locations):
+        lobe = identify_lobe(sn)
+        draw_text(10, screen_h-10 - 20 * len(source_locations) + (i + 1) * 20, GLUT_BITMAP_HELVETICA_18, 'Source %d: %s (%s)' % (i + 1, lobe[0], lobe[1]))
+
+    glMatrixMode(GL_PROJECTION)
+    glPopMatrix()
+    glMatrixMode(GL_MODELVIEW)
+    
 def identify_lobe(pos):
     if -80 <= pos[0] and pos[0] < 80 and 25 <= pos[1] and pos[1] < 75 and -45 <= pos[2] and pos[2] < 60:
         return ("Frontal lobe", "planning, emotions, problem solving")
@@ -599,16 +617,8 @@ def identify_lobe(pos):
     if -80 <= pos[0] and pos[0] < 80 and -105 <= pos[1] and pos[1] < -60 and -30 <= pos[2] and pos[2] < 60:
         return ("Occipital lobe", "vision")
  
-    return ("Unknown", "noisy signal")
-    
-def display_info():
-    global transparency_mode
-    global source_locations
-    
-    for i, sn in enumerate(source_locations):
-        lobe = identify_lobe(sn)
-        draw_text('Source %d: %s (%s)' % (i + 1, lobe[0], lobe[1]), 120, 0, -120 + 10 * len(source_locations) - (i + 1) * 10)
-   
+    return ("Unknown", "noisy signal")   
+       
 # Start the program
 main()
 
