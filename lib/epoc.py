@@ -8,13 +8,13 @@ from lib.emokit import emotiv
 import gevent
 import numpy as np
 import time
+#from multiprocessing import Queue
 
 class Epoc:
 
     sample = None
     sample_sec = 0
     sample_size = 0
-    thread_alive = True
     
     coordinates = [([-38.4,  68.6,   1.0], 'AF3'), # AF3  (1)
                    ([-69.6,  36.2,   2.6], 'F7'),  # F7   (2)
@@ -71,12 +71,12 @@ class Epoc:
             data.append(self.get_packet())
         return data
 
-    def read_samples(self):
+    def read_samples(self, epoc_packet_queue, epoc_process_alive):
         '''
         This function is run via thread
         '''
-        while True:
-            self.sample = self.read_next_sample()
+        while epoc_process_alive.value == True:
+            epoc_packet_queue.put(self.read_next_sample())
             time.sleep(0.05)
 
     def read_next_sample_dummy(self):
@@ -84,12 +84,26 @@ class Epoc:
             self.lastline = 0 
         self.lastline += self.sample_size
         return self.lines[self.lastline:self.lastline + self.sample_size]
-
-    def read_dummy_samples(self):
+    
+    def read_dummy_samples(self, epoc_packet_queue, epoc_process_alive):
         '''
         This function is run via thread
         '''
-        while self.thread_alive:
-            self.sample = self.read_next_sample_dummy()
+        while epoc_process_alive.value == True:
+            epoc_packet_queue.put(self.read_next_sample_dummy())
             time.sleep(0.05)
+
+    #def read_next_sample_dummy(self):
+    #    if self.lastline + self.sample_size >= self.lines.shape[0]:
+    #        self.lastline = 0 
+    #    self.lastline += self.sample_size
+    #    return self.lines[self.lastline:self.lastline + self.sample_size]
+    #
+    #def read_dummy_samples(self):
+    #    '''
+    #    This function is run via thread
+    #    '''
+    #    while self.thread_alive:
+    #        self.sample = self.read_next_sample_dummy()
+    #        time.sleep(0.05)
 

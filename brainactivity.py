@@ -16,6 +16,7 @@ from lib.epoc import Epoc
 from lib.sourcelocalizer import SourceLocalizer
 from OpenGL.GL.shaders import *
 from threading import Thread
+from multiprocessing import Process, Queue, Value
 from cgkit.cgtypes import *
 import traceback
 import time
@@ -25,6 +26,9 @@ import math
 brain = None
 program = None
 epoc = None
+epoc_packet_queue = Queue()
+epoc_reader_process = Process()
+epoc_process_alive = Value('b', True)
 sample_sec = 2.0
 localizer = None
 source_locations = []
@@ -160,16 +164,19 @@ def processMainMenu(option):
         rotation_matrix = mat4(1.0)
         glLoadIdentity()
     elif option == 3:
-        print "Shutting down threads ..."
-        localizer_thread_alive = False
-        epoc.thread_alive = False
-        exit(0)
+        quit()
 
 def initepoc():
     global epoc
+    global epoc_packet_queue
+    global epoc_reader_process
+    global epoc_process_alive
+
     epoc = Epoc(sample_sec)
-    epoc_reader_thread = Thread(target=epoc.read_dummy_samples)
-    epoc_reader_thread.start()
+    epoc_reader_process = Process(target=epoc.read_dummy_samples, args=(epoc_packet_queue, epoc_process_alive))
+    epoc_reader_process.start()
+    #epoc_reader_process = Process(target=epoc.read_next_sample, args=(epoc_packet_queue, epoc_process_alive))
+    #epoc_reader_process.start()
 
 def initsourceloc():
     global localizer
@@ -399,10 +406,7 @@ def keyboard(key, x, y):
         object_axis_vector = rotation_matrix.inverse()*vec3([0, 1, 0])
         rotation_matrix = rotation_matrix.rotate(-3.14/90, object_axis_vector)
     elif key == chr(27):
-        print "Shutting down threads ..."
-        localizer_thread_alive = False
-        epoc.thread_alive = False
-        exit(0)
+        quit()
     elif key == 't' or key == 'T':
         change_transparency_mode()
     elif key == 'i' or key == 'I':
@@ -521,7 +525,7 @@ def localize_sources():
     global localizer_thread_alive
 
     while localizer_thread_alive:
-        localizer.set_data(epoc.sample)
+        localizer.set_data(epoc_packet_queue.get())
         locations = []
         start_time = time.time()
         for sn in range(localizer.number_of_sources):
@@ -619,6 +623,18 @@ def identify_lobe(pos):
  
     return ("Unknown", "noisy signal")   
        
+def quit():
+    global localizer_thread_alive
+    global epoc_process_alive
+    global epoc_reader_process
+
+    print "Shutting down threads ..."
+    localizer_thread_alive = False
+    epoc_process_alive.value = False
+    epoc_reader_process.terminate()
+    exit(0)
+
+
 # Start the program
 main()
 
