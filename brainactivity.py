@@ -191,7 +191,10 @@ def reshape(w, h):
 def setProjectionMatrix(width, height):
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
-    gluPerspective (45.0, (3.0*width)/(4.0*height), 0.5, 1000.0)
+    if height == 0:
+        gluPerspective (45.0, 3.0*width, 0.5, 1000.0)
+    else:
+        gluPerspective (45.0, (3.0*width)/(4.0*height), 0.5, 1000.0)
     glMatrixMode(GL_MODELVIEW)
     
 def display():
@@ -232,6 +235,9 @@ def display():
     glutSwapBuffers()
 
 def brain_scene():
+    global transparency_mode
+    global source_locations
+    
     glPushMatrix()
     glScale(zoom_factor, zoom_factor, zoom_factor)
     glRotatef(-90,0,0,1)
@@ -253,16 +259,20 @@ def brain_scene():
     glPopMatrix()
     
     # Display info
-    display_info()
+    for i, sn in enumerate(source_locations):
+       lobe = identify_lobe(sn)
+       display_info(10, screen_h-10 - 20 * len(source_locations) + (i + 1) * 20, 'Source %d: %s (%s)' % (i + 1, lobe[0], lobe[1]))
     
 def help_scene():
+    global screen_w
+    global screen_h
     # Draw text
-    draw_text('BrainActivity3D',110,0,60)
-    draw_text('In the computational neuroscience lab we have small EEG device (http://www.emotiv.com). ',110,0,40) 
-    draw_text('The device has 14 electrodes to measure electrical activity of a brain in 14 points ',110,0,30) 
-    draw_text('on the surface of a head. The signal itself, as you can imagine, is not born on the surface of ',110,0,20) 
-    draw_text('the head, but somewhere inside of it. The purpose of this project is to locate ',110,0,10)
-    draw_text('and visualize this "somewhere"', 110, 0, 0)
+    display_info(screen_w/18, screen_h/3, 'BrainActivity3D')
+    display_info(screen_w/18, screen_h/3 + 20, 'In the computational neuroscience lab we have small EEG device (http://www.emotiv.com). ') 
+    display_info(screen_w/18, screen_h/3 + 40, 'The device has 14 electrodes to measure electrical activity of a brain in 14 points ') 
+    display_info(screen_w/18, screen_h/3 + 60, 'on the surface of a head. The signal itself, as you can imagine, is not born on the surface of ') 
+    display_info(screen_w/18, screen_h/3 + 80, 'the head, but somewhere inside of it. The purpose of this project is to locate ')
+    display_info(screen_w/18, screen_h/3 + 100, 'and visualize this "somewhere"')
 
 def idle():
     """
@@ -575,33 +585,34 @@ def draw_plane(x1,x2,x3,x4,y1,y2,y3,y4,z1,z2,z3,z4):
     glVertex3f( x4, y4, z4 )
     glEnd()
     
-def draw_text(x, y, font, text):
+def draw_text(x, y, text):
     glRasterPos2f(x,y)
-    glutBitmapString(font, text)
+    glutBitmapString(GLUT_BITMAP_HELVETICA_18, text)
 
-def display_info():
+def display_info(x, y, text):
     global screen_w
     global screen_h
-    global transparency_mode
-    global source_locations
     
+    glUseProgram(0)
     glMatrixMode(GL_PROJECTION)
     glPushMatrix()
     glLoadIdentity()
-    glOrtho(0.0, screen_w, screen_h, 0.0, -1.0, 10.0)
+    if screen_h == 0:
+        glOrtho(0.0, screen_w, 1.0, 0.0, -1.0, 10.0)
+    else:
+        glOrtho(0.0, screen_w, screen_h, 0.0, -1.0, 10.0)
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
 
     glClear(GL_DEPTH_BUFFER_BIT)
     glColor3f(0.3, 0.3, 0.3)
     
-    for i, sn in enumerate(source_locations):
-        lobe = identify_lobe(sn)
-        draw_text(10, screen_h-10 - 20 * len(source_locations) + (i + 1) * 20, GLUT_BITMAP_HELVETICA_18, 'Source %d: %s (%s)' % (i + 1, lobe[0], lobe[1]))
+    draw_text(x, y, text)
 
     glMatrixMode(GL_PROJECTION)
     glPopMatrix()
     glMatrixMode(GL_MODELVIEW)
+    glUseProgram(program)
     
 def identify_lobe(pos):
     if -80 <= pos[0] and pos[0] < 80 and 25 <= pos[1] and pos[1] < 75 and -45 <= pos[2] and pos[2] < 60:
