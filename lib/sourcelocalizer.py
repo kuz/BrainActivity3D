@@ -9,7 +9,6 @@ Implementation of Source Localization
 from sklearn.decomposition import FastICA
 from scipy.optimize import minimize
 from sklearn.decomposition import PCA
-from sympy import solve_poly_system, sympify
 import operator
 import time
 import random
