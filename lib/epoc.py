@@ -44,7 +44,8 @@ class Epoc:
         self.lines = np.asarray(self.lines)
         self.lines = np.delete(self.lines, [14,15,16], axis=1) # delete last 2 columns
         self.lastline = 0
-        
+    
+
     def get_packet(self):
         '''
         Get one packet from the device packet queue

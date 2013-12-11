@@ -21,6 +21,8 @@ from cgkit.cgtypes import *
 import traceback
 import time
 import math
+from lib.emokit import emotiv
+import gevent
 
 # Register global variables
 brain = None
@@ -646,21 +648,37 @@ def quit():
     epoc_reader_process.terminate()
     exit(0)
 
-def epoc_reader():
+    
+def epoc_to_queue():
+    q = Queue()
+    v = Value('b', True)
+    p = Process(target=epoc_reader, args=(q, v))
+    p.start()
+    
+    data = []
+    while True:
+        packet = q.get()
+        data.append(packet)
+        print packet
+        if len(data) > 128:
+            v.value = False
+            break
+    p.join()
+    print 'After join'
+    
+    
+ 
+def epoc_reader(queue, v):
     headset = emotiv.Emotiv()
     gevent.spawn(headset.setup)
     gevent.sleep(1)
-    try:
-        while True:
-            packet = headset.dequeue()
-            print packet.gyroX, packet.gyroY
-            gevent.sleep(0)
-    except KeyboardInterrupt:
-        headset.close()
-    finally:
-        headset.close()
+    while v.value == True:
+        packet = headset.dequeue()
+        if queue is not None:
+            queue.put(packet)
+        gevent.sleep(0)
 
 # Start the program
 if __name__ == '__main__':
-    epoc_reader()
+    epoc_to_queue()
 
