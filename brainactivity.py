@@ -646,8 +646,21 @@ def quit():
     epoc_reader_process.terminate()
     exit(0)
 
+def epoc_reader():
+    headset = emotiv.Emotiv()
+    gevent.spawn(headset.setup)
+    gevent.sleep(1)
+    try:
+        while True:
+            packet = headset.dequeue()
+            print packet.gyroX, packet.gyroY
+            gevent.sleep(0)
+    except KeyboardInterrupt:
+        headset.close()
+    finally:
+        headset.close()
 
 # Start the program
 if __name__ == '__main__':
-    main()
+    epoc_reader()
 
