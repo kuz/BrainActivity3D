@@ -1,6 +1,6 @@
 """
 
-Class to comunicate with Emotic EPOC device
+Comunication with Emotic EPOC device
 
 """
 
@@ -8,13 +8,13 @@ from lib.emokit import emotiv
 import gevent
 import numpy as np
 import time
-#from multiprocessing import Queue
 
 class Epoc:
 
     sample = None
     sample_sec = 0
     sample_size = 0
+    dummy = False
     
     coordinates = [([-38.4,  68.6,   1.0], 'AF3'), # AF3  (1)
                    ([-69.6,  36.2,   2.6], 'F7'),  # F7   (2)
@@ -33,8 +33,14 @@ class Epoc:
     
     def __init__(self, sample_sec):
         self.headset = emotiv.Emotiv()
-        gevent.spawn(self.headset.setup)
+        g = gevent.spawn(self.headset.setup)
         gevent.sleep(1)
+        
+        if not g.successful():
+            print 'Could not connect to the Emotiv EPOC device. Please check that it is enabled and dongle is connected.'
+            print 'Running with dummy data for now...'
+            self.dummy = True
+        
         self.sample_sec = sample_sec
         self.sample_size = int(128 * float(sample_sec))
 
@@ -45,6 +51,30 @@ class Epoc:
         self.lines = np.delete(self.lines, [14,15,16], axis=1) # delete last 2 columns
         self.lastline = 0
     
+    def read_samples(self, epoc_packet_queue, epoc_process_alive):
+        '''
+        This function is run via thread
+        '''
+        while epoc_process_alive.value == True:
+
+            if self.dummy:
+                epoc_packet_queue.put(self.read_next_sample_dummy())
+            else:
+                epoc_packet_queue.put(self.read_next_sample())
+
+            time.sleep(0.05)
+
+    def read_next_sample(self):
+        data = []
+        while len(data) < self.sample_size:
+            data.append(self.get_packet())
+        return data
+
+    def read_next_sample_dummy(self):
+        if self.lastline + self.sample_size >= self.lines.shape[0]:
+            self.lastline = 0 
+        self.lastline += self.sample_size
+        return self.lines[self.lastline:self.lastline + self.sample_size]
 
     def get_packet(self):
         '''
@@ -65,46 +95,4 @@ class Epoc:
                 packet.F4[0],
                 packet.F8[0],
                 packet.AF4[0]]
-
-    def read_next_sample(self):
-        data = None
-        while len(data) < self.sample_size:
-            data.append(self.get_packet())
-        return data
-
-    def read_samples(self, epoc_packet_queue, epoc_process_alive):
-        '''
-        This function is run via thread
-        '''
-        while epoc_process_alive.value == True:
-            epoc_packet_queue.put(self.read_next_sample())
-            time.sleep(0.05)
-
-    def read_next_sample_dummy(self):
-        if self.lastline + self.sample_size >= self.lines.shape[0]:
-            self.lastline = 0 
-        self.lastline += self.sample_size
-        return self.lines[self.lastline:self.lastline + self.sample_size]
-    
-    def read_dummy_samples(self, epoc_packet_queue, epoc_process_alive):
-        '''
-        This function is run via thread
-        '''
-        while epoc_process_alive.value == True:
-            epoc_packet_queue.put(self.read_next_sample_dummy())
-            time.sleep(0.05)
-
-    #def read_next_sample_dummy(self):
-    #    if self.lastline + self.sample_size >= self.lines.shape[0]:
-    #        self.lastline = 0 
-    #    self.lastline += self.sample_size
-    #    return self.lines[self.lastline:self.lastline + self.sample_size]
-    #
-    #def read_dummy_samples(self):
-    #    '''
-    #    This function is run via thread
-    #    '''
-    #    while self.thread_alive:
-    #        self.sample = self.read_next_sample_dummy()
-    #        time.sleep(0.05)
-
+            

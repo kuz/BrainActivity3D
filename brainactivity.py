@@ -66,9 +66,9 @@ menu = None
 scene_id = 1
 
 def initgl():
-    """
+    '''
     Initialize OpenGL and GLUT
-    """
+    '''
 
     global screen_w
     global screen_h
@@ -175,10 +175,8 @@ def initepoc():
     global epoc_process_alive
 
     epoc = Epoc(sample_sec)
-    epoc_reader_process = Process(target=epoc.read_dummy_samples, args=(epoc_packet_queue, epoc_process_alive))
+    epoc_reader_process = Process(target=epoc.read_samples, args=(epoc_packet_queue, epoc_process_alive))
     epoc_reader_process.start()
-    #epoc_reader_process = Process(target=epoc.read_next_sample, args=(epoc_packet_queue, epoc_process_alive))
-    #epoc_reader_process.start()
 
 def initsourceloc():
     global localizer
@@ -187,11 +185,12 @@ def initsourceloc():
     source_localizer_thread.start()
 
 def reshape(w, h):
+    '''
+    Process reshaping of the window
+    '''
     global screen_w
     global screen_h
-    """
-    Process reshaping of the window
-    """
+    
     screen_w = w
     screen_h = h
     glViewport(0, 0, w, h)
@@ -207,9 +206,9 @@ def setProjectionMatrix(width, height):
     glMatrixMode(GL_MODELVIEW)
     
 def display():
-    """
+    '''
     Main drawing function
-    """
+    '''
     global screen_w
     global screen_h
     global brain
@@ -275,6 +274,7 @@ def brain_scene():
 def help_scene():
     global screen_w
     global screen_h
+
     # Draw text
     display_info(screen_w/18, screen_h/3, 'BrainActivity3D')
     display_info(screen_w/18, screen_h/3 + 20, 'In the computational neuroscience lab we have small EEG device (http://www.emotiv.com). ') 
@@ -284,15 +284,15 @@ def help_scene():
     display_info(screen_w/18, screen_h/3 + 100, 'and visualize this "somewhere"')
 
 def idle():
-    """
+    '''
     Computation to be performed during idle
-    """
+    '''
     display()
 
 def mouse(button, state, x, y):
-    """
+    '''
     Process mouse events
-    """
+    '''
     global zoom_factor
     global screen_w
     global screen_h
@@ -320,13 +320,13 @@ def mouse(button, state, x, y):
         if zoom_factor >= 0.1:
             zoom_factor -= 0.05
     
+def get_arcball_vector(x, y):
     '''
     Get a normalized vector from the center of the virtual ball O to a
     point P on the virtual ball surface, such that P is aligned on
     screen's (X,Y) coordinates.  If (X,Y) is too far away from the
     sphere, return the nearest point on the virtual ball surface.
     '''
-def get_arcball_vector(x, y):
     global screen_w
     global screen_h
     P = vec3(1.0*x/screen_w*2 - 1.0, 1.0*y/screen_h*2 - 1.0, 0)
@@ -339,9 +339,9 @@ def get_arcball_vector(x, y):
     return P 
 
 def mouse_drag(x, y):
-    """
+    '''
     Process mouse events
-    """
+    '''
     global prev_x   # Location where mouse was pressed
     global prev_y
     global curr_x   
@@ -354,6 +354,7 @@ def mouse_drag(x, y):
     
     # Arcball implementation:
     if (curr_x != prev_x or curr_y != prev_y) and arcball_on == True:
+
         # Calculating two vectors to both mouse positions on the screen
         vec_to_first_click = get_arcball_vector(prev_x, prev_y)
         vec_to_second_click = get_arcball_vector(curr_x, curr_y)
@@ -378,27 +379,11 @@ def mouse_drag(x, y):
         # Save new coordinates as old
         prev_x = curr_x
         prev_y = curr_y
-    '''
-    dx = x - prev_x
-    dy = y - prev_y
-   
-    # Compute an 'object vector' which is a corresponding axis in object's coordinates
-    
-    object_axis_vector = rotation_matrix.inverse()*vec3([0, 0, 1])
-    rotation_matrix = rotation_matrix.rotate(360*3.14*dx/(screen_w * 180), object_axis_vector)
-
-    object_axis_vector = rotation_matrix.inverse()*vec3([1, 0, 0])
-    rotation_matrix = rotation_matrix.rotate(360*3.14*dy/(screen_h * 180), object_axis_vector)
-    
-    # Save current coordinates as old ones
-    
-    prev_x = x
-    prev_y = y'''
     
 def keyboard(key, x, y):
-    """
+    '''
     Process keyboard events
-    """
+    '''
     global rotation_matrix
     global localizer_thread_alive
     global epoc
@@ -433,30 +418,26 @@ def change_transparency_mode():
     global transparency_mode
     if transparency_mode == False:
         transparency_mode = True
-        print "Transparency mode switched on"
-        
     else:
         transparency_mode = False
-        print "Transparency mode switched off"
 
 def init_model():
-    """
+    '''
     Load model from Wavefront .obj file
-    """
+    '''
     global brain
     brain = objloader.OBJ('brain_20k_colored_properly.obj', 'model', swapyz=False)
 
 def main():
-    """
+    '''
     Build the main pipeline
-    """
+    '''
     freeze_support()
     initepoc()
     initsourceloc()
     initgl()
         
 def draw_brain():
-
     global p_shader_mode
     
     glPushMatrix()
@@ -546,8 +527,10 @@ def localize_sources():
 
         source_locations = locations
 
+        # Hand-picked value for 2-second signal window
+        # TODO: estimate it in runtime
         time.sleep(1.0)
-        print time.time() - start_time, "total time"
+
 def draw_sources():
     global source_locations
 
@@ -582,8 +565,7 @@ def draw_lobes():
     draw_plane(-80,80,80,-80,-105,-105,-105,-105,-30,-30,60,60) # occipital lobe
     glPopMatrix()
     
-def draw_plane(x1,x2,x3,x4,y1,y2,y3,y4,z1,z2,z3,z4): 
-    #LEFT
+def draw_plane(x1,x2,x3,x4,y1,y2,y3,y4,z1,z2,z3,z4):
     glBegin(GL_POLYGON)
     glColor3f(  0.5,  0.5, 0.5 )
     glVertex3f( x1, y1,  z1 )
@@ -642,43 +624,12 @@ def quit():
     global epoc_process_alive
     global epoc_reader_process
 
-    print "Shutting down threads ..."
+    print "Shutting down threads..."
     localizer_thread_alive = False
     epoc_process_alive.value = False
     epoc_reader_process.terminate()
     exit(0)
 
-    
-def epoc_to_queue():
-    q = Queue()
-    v = Value('b', True)
-    p = Process(target=epoc_reader, args=(q, v))
-    p.start()
-    
-    data = []
-    while True:
-        packet = q.get()
-        data.append(packet)
-        print packet
-        if len(data) > 128:
-            v.value = False
-            break
-    p.join()
-    print 'After join'
-    
-    
- 
-def epoc_reader(queue, v):
-    headset = emotiv.Emotiv()
-    gevent.spawn(headset.setup)
-    gevent.sleep(1)
-    while v.value == True:
-        packet = headset.dequeue()
-        if queue is not None:
-            queue.put(packet)
-        gevent.sleep(0)
-
 # Start the program
 if __name__ == '__main__':
-    epoc_to_queue()
-
+    main()
