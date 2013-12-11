@@ -5,7 +5,7 @@ BrainActivity3D
 Intro
 -----
 
-In the computational neuroscience lab we have small EEG device (http://www.emotiv.com). The device has 14 electrodes to measure electrical activity of a brain in 14 points on the surface of a head. The signal itself, as you can imagine, is not born on the surface of the head, but somewhere inside of it. The purpose of this project is to locate and visualize this "somewhere".
+In the [computational neuroscience lab](http://neuro.cs.ut.ee/) we have small EEG device: [Emotiv EPOC](http://www.emotiv.com). The device has 14 electrodes to measure electrical activity of a brain in 14 points on the surface of a head. The signal itself, as you can imagine, is not born on the surface of the head, but somewhere inside of it. The purpose of this project is to locate and visualize this "somewhere".
 
 By analyzing data from 14 electrodes and using source localization techniques we pinpoint 3D coordinates of the presumable source of the EEG signal inside the brain.
 
