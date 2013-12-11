@@ -16,7 +16,7 @@ from lib.epoc import Epoc
 from lib.sourcelocalizer import SourceLocalizer
 from OpenGL.GL.shaders import *
 from threading import Thread
-from multiprocessing import Process, Queue, Value
+from multiprocessing import Process, Queue, Value, freeze_support
 from cgkit.cgtypes import *
 import traceback
 import time
@@ -448,6 +448,7 @@ def main():
     """
     Build the main pipeline
     """
+    freeze_support()
     initepoc()
     initsourceloc()
     initgl()
@@ -647,5 +648,6 @@ def quit():
 
 
 # Start the program
-main()
+if __name__ == '__main__':
+    main()
 
