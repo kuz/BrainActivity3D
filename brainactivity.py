@@ -16,21 +16,22 @@ from lib.epoc import Epoc
 from lib.sourcelocalizer import SourceLocalizer
 from OpenGL.GL.shaders import *
 from threading import Thread
-from multiprocessing import Process, Queue, Value, freeze_support
+from multiprocessing import freeze_support
 from cgkit.cgtypes import *
 import traceback
 import time
 import math
 from lib.emokit import emotiv
 import gevent
+import sys
+import warnings
+
+warnings.filterwarnings("ignore", category=DeprecationWarning) 
 
 # Register global variables
 brain = None
 program = None
 epoc = None
-epoc_packet_queue = Queue()
-epoc_reader_process = Process()
-epoc_process_alive = Value('b', True)
 sample_sec = 2.0
 localizer = None
 source_locations = []
@@ -170,13 +171,7 @@ def processMainMenu(option):
 
 def initepoc():
     global epoc
-    global epoc_packet_queue
-    global epoc_reader_process
-    global epoc_process_alive
-
     epoc = Epoc(sample_sec)
-    epoc_reader_process = Process(target=epoc.read_samples, args=(epoc_packet_queue, epoc_process_alive))
-    epoc_reader_process.start()
 
 def initsourceloc():
     global localizer
@@ -432,7 +427,6 @@ def main():
     '''
     Build the main pipeline
     '''
-    freeze_support()
     initepoc()
     initsourceloc()
     initgl()
@@ -517,19 +511,19 @@ def localize_sources():
     global source_locations
     global sample_sec
     global localizer_thread_alive
-
+    
     while localizer_thread_alive:
-        localizer.set_data(epoc_packet_queue.get())
+        localizer.set_data(epoc.read_next_sample())
         locations = []
         start_time = time.time()
         for sn in range(localizer.number_of_sources):
             locations.append(localizer.localize(sn))
 
         source_locations = locations
-
-        # Hand-picked value for 2-second signal window
+            
+        # Hand-picked 1-second delay for larger windows
         # TODO: estimate it in runtime
-        time.sleep(1.0)
+        #time.sleep(max(0, sample_sec - 1.0))
 
 def draw_sources():
     global source_locations
@@ -621,15 +615,14 @@ def identify_lobe(pos):
        
 def quit():
     global localizer_thread_alive
-    global epoc_process_alive
-    global epoc_reader_process
-
+    
     print "Shutting down threads..."
+    epoc.stop_reader()
     localizer_thread_alive = False
-    epoc_process_alive.value = False
-    epoc_reader_process.terminate()
-    exit(0)
-
+    sys.exit()
+    
 # Start the program
 if __name__ == '__main__':
+    freeze_support()
     main()
+    

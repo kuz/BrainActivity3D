@@ -1,6 +1,6 @@
 """
 
-Comunication with Emotic EPOC device
+Communication with Emotiv EPOC device
 
 """
 
@@ -8,6 +8,27 @@ from lib.emokit import emotiv
 import gevent
 import numpy as np
 import time
+from multiprocessing import Process, Queue, Value
+    
+def epoc_reader(queue, alive):
+    '''
+    Self-contained function to read Emotiv EPOC device
+    Is run as separate process using multiprocessing module
+    '''
+    headset = emotiv.Emotiv()
+    g = gevent.spawn(headset.setup)
+    gevent.sleep(0.1)
+    # If process has finished then something went wrong
+    if g.ready():
+        return -1
+    else:
+        print 'Emotiv EPOC reader process is running'
+        while alive.value == True:
+            packet = headset.dequeue()
+            if queue is not None:
+                queue.put(packet)
+            gevent.sleep(0)
+        print 'Emotiv EPOC reader process has stopped'
 
 class Epoc:
 
@@ -15,6 +36,9 @@ class Epoc:
     sample_sec = 0
     sample_size = 0
     dummy = False
+    epoc_reader_process = Process()
+    epoc_packet_queue = Queue()
+    epoc_process_alive = Value('b', True)
     
     coordinates = [([-38.4,  68.6,   1.0], 'AF3'), # AF3  (1)
                    ([-69.6,  36.2,   2.6], 'F7'),  # F7   (2)
@@ -32,55 +56,58 @@ class Epoc:
                    ([ 38.4,  68.6,   1.0], 'AF4')] # AF4 (14)
     
     def __init__(self, sample_sec):
-        self.headset = emotiv.Emotiv()
-        g = gevent.spawn(self.headset.setup)
-        gevent.sleep(1)
-        
-        if not g.successful():
-            print 'Could not connect to the Emotiv EPOC device. Please check that it is enabled and dongle is connected.'
-            print 'Running with dummy data for now...'
-            self.dummy = True
-        
+
         self.sample_sec = sample_sec
         self.sample_size = int(128 * float(sample_sec))
-
-        # Load dummy data
-        f = open('data/201305182224-DF-facial-3-420.csv').readlines()
-        self.lines = [map(float, ln.split(',')) for ln in f]
-        self.lines = np.asarray(self.lines)
-        self.lines = np.delete(self.lines, [14,15,16], axis=1) # delete last 2 columns
-        self.lastline = 0
     
-    def read_samples(self, epoc_packet_queue, epoc_process_alive):
-        '''
-        This function is run via thread
-        '''
-        while epoc_process_alive.value == True:
-
-            if self.dummy:
-                epoc_packet_queue.put(self.read_next_sample_dummy())
-            else:
-                epoc_packet_queue.put(self.read_next_sample())
-
-            time.sleep(0.05)
+        # Start reading the signal
+        self.epoc_reader_process = Process(target=epoc_reader, args=(self.epoc_packet_queue, self.epoc_process_alive))
+        self.epoc_reader_process.start()
+        
+        # Wait a bit to see if we can find the device
+        print 'Looking for device'
+        time.sleep(2.0)
+        
+        # If reader process has exited, then device was not found
+        if self.epoc_reader_process.exitcode is not None:
+            self.dummy = True
+            print 'Could not connect to the device. Running with dummy data.'
+        
+            # Load dummy data
+            f = open('data/201305182224-DF-facial-3-420.csv').readlines()
+            self.lines = [map(float, ln.split(',')) for ln in f]
+            self.lines = np.asarray(self.lines)
+            self.lines = np.delete(self.lines, [14,15,16], axis=1) # delete last 2 columns
+            self.lastline = 0
 
     def read_next_sample(self):
-        data = []
-        while len(data) < self.sample_size:
-            data.append(self.get_packet())
-        return data
-
-    def read_next_sample_dummy(self):
-        if self.lastline + self.sample_size >= self.lines.shape[0]:
-            self.lastline = 0 
-        self.lastline += self.sample_size
-        return self.lines[self.lastline:self.lastline + self.sample_size]
+    
+        if self.dummy == True:
+        
+            # Read pre-recorded data from file
+            if self.lastline + self.sample_size >= self.lines.shape[0]:
+                self.lastline = 0 
+            self.lastline += self.sample_size
+            return self.lines[self.lastline:self.lastline + self.sample_size]
+            
+        else:
+        
+            # Read sample of required size
+            data = []
+            while len(data) < self.sample_size:
+                data.append(self.get_packet())
+            
+            # Clear the queue
+            while not self.epoc_packet_queue.empty():
+                self.epoc_packet_queue.get()
+        
+            return data
 
     def get_packet(self):
         '''
         Get one packet from the device packet queue
         '''
-        packet = self.headset.dequeue()
+        packet = self.epoc_packet_queue.get()
         return [packet.AF3[0],
                 packet.F7[0],
                 packet.F3[0],
@@ -95,4 +122,9 @@ class Epoc:
                 packet.F4[0],
                 packet.F8[0],
                 packet.AF4[0]]
+                
+    def stop_reader(self):
+        self.epoc_process_alive.value = False
+        #self.epoc_reader_process.join()
+        self.epoc_reader_process.terminate()
             

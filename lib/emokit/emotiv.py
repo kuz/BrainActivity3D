@@ -513,7 +513,7 @@ class Emotiv(object):
         key = ''.join(k)
         iv = Random.new().read(AES.block_size)
         cipher = AES.new(key, AES.MODE_ECB, iv)
-        for i in k: print "0x%.02x " % (ord(i))
+        #for i in k: print "0x%.02x " % (ord(i))
         while self._goOn:
             while not tasks.empty():
                 task = tasks.get()
