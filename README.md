@@ -50,7 +50,6 @@ Miscellaneous
 -------------
 
 <b>Major things to do</b>:
-* Fix gevent multiprocessing issues
 * Create proper egg
 * Use beamforming to assign activity value to each point inside the model
 * Run experiments on proper EEG device
