@@ -1,4 +1,4 @@
-\documentclass[]{report}   % list options between brackets
+\documentclass[]{article}   % list options between brackets
 \usepackage{graphicx} % Required to insert images
 \usepackage{listings} % Required for insertion of code
 \usepackage{courier} % Required for the courier font
@@ -7,12 +7,18 @@
 \usepackage{subfigure}
 \usepackage{float}
 \usepackage{url}
+\usepackage{authblk}
 % type user-defined commands here
+
+\title{Description of the project BrainActivity3D}   % type title between braces
+\author{Anna Leontyeva, Ilya Kuzovkin and Dmytro Fishman} 
+
+\affil{University of Tartu, Institute of Computer Science}
+
 
 \begin{document}
 
-\title{Description of the project BrainActivity3D}   % type title between braces
-\author{Anna Leontyeva, Ilya Kuzovkin, Dmytro Fishman}         % type author(s) between braces
+         % type author(s) between braces
 
 \maketitle
      
@@ -26,11 +32,11 @@ The computational neuroscience lab has at its disposal EEG device (\url{http://w
 The device records the signal from all electrodes  \emph{TODO: Ilya input about frequencies and measures}.
 The resulting data serves as an input for the BrainActivity3D application. It can be used both in real time with the device installed on a human by sending data each 2 sec (TODO: Ilya confirm) from the device to the application or pre-recorded data can be used.
   
-\begin{figure}[!htbp]
+\begin{figure}[!h]
 \begin{center}
+\includegraphics[width=0.5\columnwidth]{../Images/epoc_placement} 
 \caption{}
 \label{fig:epoc_placement}
-\includegraphics[width=0.7\columnwidth]{../Images/epoc_placement} 
 \end{center}
 \end{figure}
  
@@ -40,12 +46,20 @@ The main purpose of the application is to find the position of the activity sour
 We approach the problem of source localization using one of the method proposed by Zukov,L. et al \cite{zhukov2000}. To identify number of sources we perform Principal Component Analysis (PCA) and pick the number of components that describe $xx\%$ of the variance. Secondly, we perform Independent component analysis (ICA) to find the contributions of each source to each electrode. The contributions are then used to allocate the signal using penalized least-square optimization.
 
 \section{Visualization aspects}
-The application visualize a 3D model of the brain with differently colored lobes (TODO: insert screenshot for the app, same as Ilya used). The brain can be displayed in two modes: solid one and completely transparent (use key \emph{'T'} to switch between two modes). Blue electrodes with corresponding labels are displayed slightly above the brain. The labels correspond to the conventional system $10-20$ recommended by the International Federation of Societies for Electroencephalography and Clinical Neurophysiology. illuminated source is positioned inside the brain. The lower corner provides constant information about the number of sources, the lobes, where they appear and the activity these lobes correspond to. The brain can be rotated (both with the mouse and the arrows of the keyboard) and zoomed (mouse). 
+The application visualize a 3D model of the brain with differently colored lobes (see Figure \ref{fig:screenshot}). The brain can be displayed in two modes: solid one and completely transparent (use key \emph{'T'} to switch between two modes). Blue electrodes with corresponding labels are displayed slightly above the brain. The labels correspond to the conventional system $10-20$ recommended by the International Federation of Societies for Electroencephalography and Clinical Neurophysiology. illuminated source is positioned inside the brain. The lower corner provides constant information about the number of sources, the lobes, where they appear and the activity these lobes correspond to. The brain can be rotated (both with the mouse and the arrows of the keyboard) and zoomed (mouse). 
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width=1\columnwidth]{../Images/screenshot}
+\caption{}
+\label{fig:screenshot} 
+\end{center}
+\end{figure}
+
 \section{Installation}
 \emph{TODO Ilya}
 
 \section{Example}
-Let us take an example, how this application can be used. Position the device on a head of the patient (!!!!) according to the instructions provided with the device. Turn on the application and ask the patient to perform different activities (eye blinking, snapping teeth, thinking od something in particular). Follow the source moving in time from one position to another and compare it to the corresponding activity. If the patient blinks with right eyes, we expect the source to be on the right side in the frontal lobe near the elcrtode $F4$.  
+Let us take an example, how this application can be used. Position the device on a head of the subject according to the instructions provided with the device. Turn on the application and ask the patient to perform different activities (eye blinking, snapping teeth, thinking od something in particular). Follow the source moving in time from one position to another and compare it to the corresponding activity. If the subject blinks with right eyes, we expect the source to be on the right side in the frontal lobe near the electrode $F4$.  
 
 \bibliographystyle{plain}
 \bibliography{project_references}
