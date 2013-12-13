@@ -471,7 +471,7 @@ def draw_electrodes():
         
         if most_influential_electrodes2.has_key(electrode):
             draw_electrode(coordinate[0], coordinate[1], [0.9, 0.4, 0.4, 1])
-            print most_influential_electrodes2
+           
             for contributed_source in most_influential_electrodes2[electrode]:
                 if contributed_source == 0:
                     line_color = list([0.9, 0.4, 0.4])
