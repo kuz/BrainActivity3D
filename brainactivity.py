@@ -25,6 +25,7 @@ from lib.emokit import emotiv
 import gevent
 import sys
 import warnings
+import copy
 
 warnings.filterwarnings("ignore", category=DeprecationWarning) 
 
@@ -36,7 +37,9 @@ sample_sec = 2.0
 localizer = None
 source_locations = []
 localizer_thread_alive = True
-
+influential_per_source = 3
+most_influential_electrodes = dict()
+connecting_line_width = 2.0
 # Rotation variables:
 rotation_matrix = mat4(1.0)
 prev_x = 0
@@ -257,7 +260,6 @@ def brain_scene():
         glDepthFunc(GL_LEQUAL)
         glColorMask(True, True, True, True)
         draw_brain()
-
     draw_electrodes()
     glPopMatrix()
     
@@ -449,10 +451,13 @@ def draw_brain():
 
 def draw_electrodes():
     global p_shader_mode
-
+    global electrodes_activity
+    global source_locations
+    global most_influential_electrodes
+    
     # Material front   
     glMaterialfv(GL_FRONT, GL_AMBIENT, [0.2, 0.2, 0.2, 1])
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, [0.4, 0.4, 0.9, 1])
+    #glMaterialfv(GL_FRONT, GL_DIFFUSE, [0.4, 0.4, 0.9, 1])
     glMaterialfv(GL_FRONT, GL_SPECULAR, [0, 0, 0, 1])
     glMaterialfv(GL_FRONT, GL_SHININESS, 0)
     glMaterialfv(GL_FRONT, GL_EMISSION, [0, 0, 0, 1])
@@ -460,20 +465,57 @@ def draw_electrodes():
     glUniform1i(p_shader_mode, 1) # blinn
     glPushMatrix()
     glMultMatrixf(rotation_matrix.toList())
-    
-    for coordinate in epoc.coordinates:
-        draw_electrode(coordinate[0], coordinate[1])
-    
+    most_influential_electrodes2 = copy.deepcopy(most_influential_electrodes)
+    source_locations2 = copy.deepcopy(source_locations)
+    for electrode,coordinate in enumerate(epoc.coordinates):
+        
+        if most_influential_electrodes2.has_key(electrode):
+            draw_electrode(coordinate[0], coordinate[1], [0.9, 0.4, 0.4, 1])
+            print most_influential_electrodes2
+            for contributed_source in most_influential_electrodes2[electrode]:
+                if contributed_source == 0:
+                    line_color = list([0.9, 0.4, 0.4])
+                elif contributed_source == 1:
+                    line_color = list([0.3, 0.3, 0.3])
+                elif contributed_source == 2:
+                    line_color = list([0.0, 0.5, 0.0])
+                elif contributed_source == 3:
+                    line_color = list([0.94, 0.5, 0.5])
+                elif contributed_source == 4:
+                    line_color = list([0.29, 0, 0.5])
+                draw_connecting_line(coordinate[0],source_locations2[contributed_source], line_color)
+        else:
+            draw_electrode(coordinate[0], coordinate[1], [0.4, 0.4, 0.9, 1])
     glPopMatrix()
 
-def draw_electrode(position, label):
+def draw_connecting_line(electrod_coordinates, source_coordinates, color):
+    global connecting_line_width
+    
+    glUniform1i(p_shader_mode, 0)
+    
+    glColor3f(color[0], color[1], color[2])
+    glPushMatrix()
+    glLineWidth(connecting_line_width)
+    glLineStipple(6, 0xAAAA)
+    glEnable(GL_LINE_STIPPLE)
+    glBegin(GL_LINES)
+    glVertex3f(electrod_coordinates[0], electrod_coordinates[1], electrod_coordinates[2])
+    glVertex3f(source_coordinates[0], source_coordinates[1], source_coordinates[2])
+    glEnd()
+    glPopMatrix()
+    
+    glUniform1i(p_shader_mode, 1)
+    
+def draw_electrode(position, label, material):
     glColor3f(0.18, 0.31, 0.31)
     glPushMatrix()
     glTranslate(position[0],  position[1],  position[2])
     draw_label(label)
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, material)
     glutSolidSphere(5, 20, 20)
     glPopMatrix()
 
+    
 def draw_label(text):
     global program 
     glUseProgram(0)
@@ -511,19 +553,34 @@ def localize_sources():
     global source_locations
     global sample_sec
     global localizer_thread_alive
+    global influential_per_source
+    global most_influential_electrodes
     
     while localizer_thread_alive:
         localizer.set_data(epoc.read_next_sample())
+        localizer.ica()  
         locations = []
-        start_time = time.time()
-        for sn in range(localizer.number_of_sources):
+        influential_electrodes = {}
+        
+        for sn in range(localizer.number_of_sources):           
             locations.append(localizer.localize(sn))
-
-        source_locations = locations
             
+            contributions = []
+            for j in range(len(localizer.mixing_matrix)):
+                contributions.append(localizer.mixing_matrix[j][sn]**2)
+                
+            # Finding most influential contributions:
+            contributing_electrodes = sorted(range(len(contributions)), key=lambda x: contributions[x])[-influential_per_source:]
+            for electrode in contributing_electrodes:
+                if not influential_electrodes.has_key(electrode):
+                    influential_electrodes[electrode] = []
+                influential_electrodes[electrode].append(sn)
+                
+        most_influential_electrodes = influential_electrodes
+        source_locations = locations
         # Hand-picked 1-second delay for larger windows
         # TODO: estimate it in runtime
-        #time.sleep(max(0, sample_sec - 1.0))
+        time.sleep(2.0)
 
 def draw_sources():
     global source_locations

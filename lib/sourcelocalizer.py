@@ -66,7 +66,6 @@ class SourceLocalizer:
         return k / (sum((source_pos - electrode_pos)**2) + 1)
 
     def localize(self, source):   
-        self.ica()
         (x, y, z, k) = self.optimize(source)
         self.last_source_locations[source] = [x, y, z, k]
         return [x, y, z]
@@ -75,3 +74,4 @@ class SourceLocalizer:
         pca = PCA()
         pca.fit(self.data)
         return list(pca.explained_variance_ratio_ > 0.1).count(True)
+        #return 1
