@@ -37,9 +37,9 @@ Dependecies
 * pywinusb
 * gevent
 * PyCrypto
-* OpenGL
+* PyOpenGL
 * cgkit
-* sklearn
+* scikit-learn
 * scipy
 * numpy
 
