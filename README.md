@@ -1,6 +1,6 @@
 BrainActivity3D
 ===============
-![Screenshot](https://github.com/kuz/BrainActivity3D/raw/master/doc/Images/screenshot.png)
+![Screenshot](https://github.com/kuz/BrainActivity3D/raw/master/doc/Images/applicationwindow.png)
 
 Intro
 -----
