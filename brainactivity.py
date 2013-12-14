@@ -29,7 +29,7 @@ import copy
 
 warnings.filterwarnings("ignore", category=DeprecationWarning) 
 
-# Register global variables
+# Global variables
 brain = None
 program = None
 epoc = None
@@ -40,6 +40,7 @@ localizer_thread_alive = True
 influential_per_source = 3
 most_influential_electrodes = dict()
 connecting_line_width = 2.0
+
 # Rotation variables:
 rotation_matrix = mat4(1.0)
 prev_x = 0
@@ -51,6 +52,7 @@ arcball_on = False
 screen_w = 800
 screen_h = 600
 zoom_factor = 1.0
+
 # Drawing mode for fragment shader:
 #   0 - simple color
 #   1 - blinn model
@@ -585,9 +587,10 @@ def localize_sources():
                 
         most_influential_electrodes = influential_electrodes
         source_locations = locations
+
         # Hand-picked 1-second delay for larger windows
         # TODO: estimate it in runtime
-        time.sleep(2.0)
+        #time.sleep(2.0)
 
 def draw_sources():
     global source_locations
