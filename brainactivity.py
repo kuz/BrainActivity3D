@@ -454,6 +454,7 @@ def draw_electrodes():
     global electrodes_activity
     global source_locations
     global most_influential_electrodes
+    global transparency_mode
     
     # Material front   
     glMaterialfv(GL_FRONT, GL_AMBIENT, [0.2, 0.2, 0.2, 1])
@@ -465,29 +466,35 @@ def draw_electrodes():
     glUniform1i(p_shader_mode, 1) # blinn
     glPushMatrix()
     glMultMatrixf(rotation_matrix.toList())
-    most_influential_electrodes2 = copy.deepcopy(most_influential_electrodes)
-    source_locations2 = copy.deepcopy(source_locations)
-    for electrode,coordinate in enumerate(epoc.coordinates):
-        
-        if most_influential_electrodes2.has_key(electrode):
-            draw_electrode(coordinate[0], coordinate[1], [0.9, 0.4, 0.4, 1])
-           
-            for contributed_source in most_influential_electrodes2[electrode]:
-                if contributed_source == 0:
-                    line_color = list([0.9, 0.4, 0.4])
-                elif contributed_source == 1:
-                    line_color = list([0.3, 0.3, 0.3])
-                elif contributed_source == 2:
-                    line_color = list([0.0, 0.5, 0.0])
-                elif contributed_source == 3:
-                    line_color = list([0.94, 0.5, 0.5])
-                elif contributed_source == 4:
-                    line_color = list([0.29, 0, 0.5])
-                draw_connecting_line(coordinate[0],source_locations2[contributed_source], line_color)
+    
+    # Protecting variables from overwriting by other threads
+    mie = copy.deepcopy(most_influential_electrodes)
+    sl = copy.deepcopy(source_locations)
+    
+    for electrode,coordinate in enumerate(epoc.coordinates):     
+        if mie.has_key(electrode):           
+            for contributed_source in mie[electrode]:
+                line_color = get_color(contributed_source)
+                draw_electrode(coordinate[0], coordinate[1], line_color)
+                if transparency_mode:
+                    draw_connecting_line(coordinate[0],sl[contributed_source], line_color)
         else:
-            draw_electrode(coordinate[0], coordinate[1], [0.4, 0.4, 0.9, 1])
+            draw_electrode(coordinate[0], coordinate[1], [0.9, 0.9, 0.9, 1])
     glPopMatrix()
 
+def get_color(index):
+    if index == 0:
+        line_color = list([0.9, 0.4, 0.4,1])
+    elif index == 1:
+        line_color = list([0.96, 0.64, 0.38,1])
+    elif index == 2:
+        line_color = list([0.0, 0.5, 0.0,1])
+    elif index == 3:
+        line_color = list([0.94, 0.5, 0.5,1])
+    elif index == 4:
+        line_color = list([0.29, 0, 0.5,1])
+    return line_color
+    
 def draw_connecting_line(electrod_coordinates, source_coordinates, color):
     global connecting_line_width
     
@@ -632,7 +639,7 @@ def draw_text(x, y, text):
 def display_info(x, y, text):
     global screen_w
     global screen_h
-    
+
     glUseProgram(0)
     glMatrixMode(GL_PROJECTION)
     glPushMatrix()
@@ -645,8 +652,7 @@ def display_info(x, y, text):
     glLoadIdentity()
 
     glClear(GL_DEPTH_BUFFER_BIT)
-    glColor3f(0.3, 0.3, 0.3)
-    
+        
     draw_text(x, y, text)
 
     glMatrixMode(GL_PROJECTION)
