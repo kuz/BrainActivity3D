@@ -8,9 +8,10 @@
 \usepackage{float}
 \usepackage{url}
 \usepackage{authblk}
+\usepackage{wrapfig}
 % type user-defined commands here
 
-\title{Description of the project BrainActivity3D}   % type title between braces
+\title{BrainActivity3D: Tool for EEG Signal Source Visualization}   % type title between braces
 \author{Anna Leontyeva, Ilya Kuzovkin and Dmytro Fishman} 
 
 \affil{University of Tartu, Institute of Computer Science}
@@ -23,7 +24,17 @@
 \maketitle
      
 \section{Introduction}
-BrainActivity3D is a graphical application that aims to visualize sources of a brain activity and allocate them inside the brain. It takes as an input electroencephalography (EEG) signal, applies signal processing and outputs coordinates of the strongest signal that corresponds to a muscle activity. The result is showed on a 3d model of the human brain with the highlighted source position.         
+BrainActivity3D is a graphical application that localizes source of EEG signal and renders it inside the 3D model of the human brain. It takes as an input electroencephalography (EEG) signal, 
+\begin{wrapfigure}{r}{0.45\textwidth}
+ \centering
+ \vspace{-8pt}
+ \includegraphics[width=0.45\textwidth]{../Images/emotiv.jpg}
+ \caption{Epoc device}
+ \label{fig:summation_of_postsynaptic_potentials}
+ \vspace{-40pt}
+\end{wrapfigure}
+applies signal processing and outputs coordinates of the strongest signal that corresponds to a muscle activity. The result is showed on a 3d model of the human brain with the highlighted source position.         
+
 
 \section{Input data for EEG signal}
 The central neural system consists of neurons that respond to stimuli and transmit information over long distances. When  neurons are activated, it produces current that can be measured with EEG systems.
