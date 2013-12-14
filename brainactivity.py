@@ -63,6 +63,11 @@ p_shader_mode = 0
 #   1 - xray
 transparency_mode = False
 
+# Pause mode
+#   0 - mode is passive
+#   1 - mode is active
+pause_mode = 0
+
 # Menu
 menu = None
 
@@ -140,9 +145,10 @@ def createMenu():
     
     mainMenu = glutCreateMenu(processMainMenu);
     glutAddMenuEntry("Change transparency mode - T", 1)
-    glutAddMenuEntry("Initial view - I", 2)
+    glutAddMenuEntry('Change pause mode - P', 2)
+    glutAddMenuEntry("Initial view - I", 3)
     glutAddSubMenu("Display:", menu)
-    glutAddMenuEntry("Quit - ESC", 3)
+    glutAddMenuEntry("Quit - ESC", 4)
     
     glutAttachMenu(GLUT_RIGHT_BUTTON)
     return 0
@@ -162,14 +168,21 @@ def processMainMenu(option):
     global rotation_matrix
     global localizer_thread_alive
     global epoc
+    global pause_mode
     
     arcball_on = False
     if option == 1:
         change_transparency_mode()
     elif option == 2:
+        pause_mode = (pause_mode + 1) % 2
+        if pause_mode:
+            print 'Pause mode enabled'
+        else:
+            print 'Pause mode disabled'
+    elif option == 3:
         rotation_matrix = mat4(1.0)
         glLoadIdentity()
-    elif option == 3:
+    elif option == 4:
         quit()
 
 def initepoc():
@@ -243,6 +256,7 @@ def display():
 def brain_scene():
     global transparency_mode
     global source_locations
+    global pause_mode
     
     glPushMatrix()
     glScale(zoom_factor, zoom_factor, zoom_factor)
@@ -385,6 +399,7 @@ def keyboard(key, x, y):
     global localizer_thread_alive
     global epoc
     global scene_id
+    global pause_mode
     
     if key == GLUT_KEY_LEFT:
         # Compute an 'object vector' which is a corresponding axis in object's coordinates  
@@ -410,7 +425,13 @@ def keyboard(key, x, y):
         scene_id = 0
     elif key == 'b' or key == 'B':
         scene_id = 1
-            
+    elif key == 'p' or key == 'P':
+        pause_mode = (pause_mode + 1) % 2
+        if pause_mode:
+            print 'Pause mode enabled'
+        else:
+            print 'Pause mode disabled'
+    
 def change_transparency_mode():
     global transparency_mode
     if transparency_mode == False:
@@ -435,12 +456,13 @@ def main():
         
 def draw_brain():
     global p_shader_mode
+    global transparency_mode
     
     glPushMatrix()
     if(transparency_mode == False):
         glUniform1i(p_shader_mode, 2) # xray
     else: glUniform1i(p_shader_mode, 3) # xray with half of the intensity
-
+    
     try:
         glMultMatrixf(rotation_matrix.toList())
         glCallList(brain.gl_list)
@@ -562,13 +584,13 @@ def localize_sources():
     global localizer_thread_alive
     global influential_per_source
     global most_influential_electrodes
+    global pause_mode
     
     while localizer_thread_alive:
         localizer.set_data(epoc.read_next_sample())
         localizer.ica()  
         locations = []
         influential_electrodes = {}
-        
         for sn in range(localizer.number_of_sources):           
             locations.append(localizer.localize(sn))
             
@@ -582,9 +604,9 @@ def localize_sources():
                 if not influential_electrodes.has_key(electrode):
                     influential_electrodes[electrode] = []
                 influential_electrodes[electrode].append(sn)
-                
-        most_influential_electrodes = influential_electrodes
-        source_locations = locations
+        if pause_mode == 0:       
+            most_influential_electrodes = influential_electrodes
+            source_locations = locations
         # Hand-picked 1-second delay for larger windows
         # TODO: estimate it in runtime
         time.sleep(2.0)
@@ -639,7 +661,6 @@ def draw_text(x, y, text):
 def display_info(x, y, text):
     global screen_w
     global screen_h
-
     glUseProgram(0)
     glMatrixMode(GL_PROJECTION)
     glPushMatrix()
@@ -650,11 +671,9 @@ def display_info(x, y, text):
         glOrtho(0.0, screen_w, screen_h, 0.0, -1.0, 10.0)
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
-
     glClear(GL_DEPTH_BUFFER_BIT)
-        
     draw_text(x, y, text)
-
+    
     glMatrixMode(GL_PROJECTION)
     glPopMatrix()
     glMatrixMode(GL_MODELVIEW)
