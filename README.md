@@ -55,5 +55,5 @@ Miscellaneous
 * Run experiments on proper EEG device
 
 <b>References</b>:
-* www.brainder.org - Reference model of a human brain
+* www.brainder.org - Model of a human brain
 * Saeid, S. & Chambers, J. A. (2007). EEG Signal Processing.
