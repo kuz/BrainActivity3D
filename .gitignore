@@ -34,3 +34,9 @@ nosetests.xml
 .pydevproject
 
 .DS_Store
+
+# Tex files
+*.aux
+*.log
+*.out
+*.synctex.gz
