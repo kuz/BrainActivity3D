@@ -615,7 +615,7 @@ def localize_sources():
 
         # Hand-picked 1-second delay for larger windows
         # TODO: estimate it in runtime
-        time.sleep(2.0)
+        #time.sleep(2.0)
 
 def draw_sources():
     global source_locations
