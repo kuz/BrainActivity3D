@@ -1,9 +1,0 @@
-('C:\\Users\\kuz\\Documents\\BrainActivity3D\\binaries\\Windows\\build\\onedir\\brainactivity.exe',
- True,
- False,
- None,
- None,
- [],
- None,
- False,
- 1387231446L)

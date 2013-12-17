@@ -1,9 +1,9 @@
 Pre-compiled binary files
 -------------------------
 You can find pre-built binaries for your system in
-    Windows\dist\brainactivity.exe
-    MacOSX\dist\brainactivity.app
-    Linux\dist\brainactivity
+    Windows\brainactivity.zip
+    (MacOSX\brainactivity.app)
+    (Linux\brainactivity)
 
 Building the bundle on your own system
 --------------------------------------
