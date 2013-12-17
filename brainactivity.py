@@ -17,7 +17,7 @@ from lib.sourcelocalizer import SourceLocalizer
 from OpenGL.GL.shaders import *
 from threading import Thread
 from multiprocessing import freeze_support
-from cgkit.cgtypes import *
+from cgkit.cgtypes import vec3, mat4
 import traceback
 import time
 import math
@@ -712,5 +712,4 @@ def quit():
 # Start the program
 if __name__ == '__main__':
     freeze_support()
-    main()
-    
+    main()    
