@@ -11,6 +11,12 @@ By analyzing data from 14 electrodes and using source localization techniques we
 
 How to run
 ----------
+
+#### Using precompiled binaries
+Application bundles for Windows, MacOSX (not yet) and Linux (not yet) is available in _binaries_ directory. 
+
+#### Using python source
+
 Install all the missing python modules and run main application file:
 ```
 python brainactivity.py
