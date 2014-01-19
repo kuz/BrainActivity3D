@@ -13,7 +13,7 @@ How to run
 ----------
 
 #### Using precompiled binaries
-Application bundles for Windows, MacOSX (not yet) and Linux (not yet) is available in _binaries_ directory. 
+Application bundles for Windows, MacOSX and Linux (not yet) is available in _binaries_ directory. 
 
 #### Using python source
 
