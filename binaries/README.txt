@@ -2,7 +2,7 @@ Pre-compiled binary files
 -------------------------
 You can find pre-built binaries for your system here
     Windows: www.ikuz.eu/download/brainactivity3d/brainactivity3d_win.zip
-    MacOSX: www.ikuz.eu/download/brainactivity3d/brainactivity3d_mac.zip
+    (MacOSX: ...)
     (Linux: ...)
 
 Building the bundle on your own system
