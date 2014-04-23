@@ -42,9 +42,11 @@ Dependecies
 * [emokit](https://github.com/openyou/emokit) to communicate with the device. It is bundled with the application.
 * pywinusb
 * gevent
+* greenlet
 * PyCrypto
 * PyOpenGL
 * cgkit
+* pygame
 * scikit-learn
 * scipy
 * numpy
